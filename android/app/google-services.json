@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "442679774821",
+    "project_id": "fibbrodb",
+    "storage_bucket": "fibbrodb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442679774821:android:298d11fa9ab9a7fd62808c",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGNYXCcfFxPjmibCjjfP8RoaKnyfIKmZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

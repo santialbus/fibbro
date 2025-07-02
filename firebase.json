@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"fibbrodb","appId":"1:442679774821:android:298d11fa9ab9a7fd62808c","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"fibbrodb","configurations":{"android":"1:442679774821:android:298d11fa9ab9a7fd62808c","web":"1:442679774821:web:ec00ed8ee98b4a3462808c"}}}}}}
