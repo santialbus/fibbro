@@ -28,16 +28,47 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
       );
       final List<dynamic> jsonData = json.decode(jsonString);
 
-      final filteredArtists =
+      // Filtramos los artistas del escenario South Beach con hora válida
+      final List<Artist> withTime =
           jsonData
               .map((json) => Artist.fromJson(json))
-              .where((artist) => artist.stage == 'South Beach')
+              .where(
+                (artist) =>
+                    artist.stage == 'South Beach' && artist.time != null,
+              )
               .toList();
 
-      print('Artistas cargados: ${filteredArtists.length}');
+      // Ordenar por hora con regla nocturna
+      withTime.sort((a, b) {
+        int parseHour(String time) {
+          final parts = time.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+
+          // Si es entre 00:00 y 05:59, lo consideramos +24h
+          if (hour < 6) hour += 24;
+
+          return hour * 60 + minute;
+        }
+
+        return parseHour(a.time!) - parseHour(b.time!);
+      });
+
+      // Artistas sin hora (opcionalmente los puedes añadir al final)
+      final List<Artist> withoutTime =
+          jsonData
+              .map((json) => Artist.fromJson(json))
+              .where(
+                (artist) =>
+                    artist.stage == 'South Beach' && artist.time == null,
+              )
+              .toList();
 
       setState(() {
-        artists = filteredArtists;
+        artists = [
+          ...withTime,
+          ...withoutTime,
+        ]; // primero con hora, luego sin hora
         isLoading = false;
         _errorMessage = null;
       });

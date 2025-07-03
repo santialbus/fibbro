@@ -3,163 +3,163 @@
       "id": "9e2f1c0f-185a-426d-ae54-d68fd63160e7",
       "name": "30 Seconds to Mars",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:20",
+      "genre": "Rock",
+      "stage": "Heineken", 
+  "duration": 85
     },
     {
       "id": "71c50fa1-127e-41f0-a8a0-38ebfc3b6f48",
       "name": "Bloc Party",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:05",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "78b3a3c3-2e35-4fd2-89c5-c36db9a01042",
       "name": "Olly Alexander",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:45",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "e344c03f-e5c5-4f71-b71c-7de93c3d9793",
       "name": "Ca7riel & Paco Amoroso",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:35",
+      "genre": "Pop",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "681e6d8d-c097-4027-a52d-1ccdf37f2824",
       "name": "Shinova",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "06c8a00a-28b1-4bc6-9e7b-7f064f6f3c76",
       "name": "La Casa Azul",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:15",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "a4b78b10-b72c-4c7b-8c92-271ed08f1813",
       "name": "Miss Caffeina",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "d35725e6-089e-4ea6-a9a1-53989e8353f3",
       "name": "Kakkmaddafakka",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:45",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "f0f48f76-86a5-4a45-814b-73a1f59ea182",
       "name": "Soft Play",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:15",
+      "genre": "Punk rock",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "48bb9cc7-0c8e-4521-8b20-0a7a20c0fdb6",
       "name": "Hard Life",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Indie",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "5dc8b4a2-682d-4f0e-89e2-d6bcb6eae0fa",
       "name": "La Habitación Roja",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 60
     },
     {
       "id": "c168f610-79c3-496b-b0d5-282f267d8699",
       "name": "Digitalism",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:45",
+      "genre": "Electro",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "442bf42b-cdcd-4d8f-b0de-482cdfcb1671",
       "name": "Lambrini Girls",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:35",
+      "genre": "Indie",
+      "stage": "Repsol", 
+  "duration": 70
     },
     {
       "id": "b1d50826-34c3-4c43-a89b-c73b4f728e6c",
       "name": "Barry B",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:30",
+      "genre": "Indie",
+      "stage": "Rising Stars", 
+  "duration": 65
     },
     {
       "id": "be36b0dc-d78c-4385-9f01-16f43ab7e009",
       "name": "Chica Sobresalto",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:15",
+      "genre": "Indie",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "e5d52894-1cc3-4058-841f-2dd3c79fbd9d",
       "name": "Camellos",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:50",
+      "genre": "Rock n roll",
+      "stage": "Rising Stars", 
+  "duration": 55
     },
     {
       "id": "fae12ec2-d185-4bce-925e-f2b7745a9ee7",
       "name": "Margarita Quebrada",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Indie",
+      "stage": "Repsol", 
+  "duration": 60
     },
     {
       "id": "4578b994-e0be-49a1-a95c-2ea92023ec15",
       "name": "Bonaerense",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Indie",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "d622c84b-93b5-4894-9258-10e2f9d51969",
@@ -192,46 +192,46 @@
       "id": "77fd0de2-0ed1-4e80-87e7-86b645ef1be8",
       "name": "Adam Beyer",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
+      "time": "01:00",
+      "genre": "Electo",
       "stage": "South Beach", 
-  "duration": null
+  "duration": 120
     },
     {
       "id": "fc5a6231-5937-49c4-9393-ffec260c8e46",
       "name": "DJ Tennis",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "1885d108-5b55-42ed-b130-1f3082a99712",
       "name": "HAAi",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:00",
+      "genre": "Electo",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "c1e58b11-bcd6-4c10-8d1b-482cc5f1c7fc",
       "name": "Pauza",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:00",
+      "genre": "House",
+      "stage": "South Beach", 
+  "duration": 60
     },
     {
       "id": "c05be02d-9303-43ce-8c28-13ce8f97c9fd",
       "name": "TheBasemente SoundSystem",
       "date": "2025-07-17",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "House",
+      "stage": "South Beach", 
+  "duration": 60
     },
     {
       "id": "cfd057fb-fc2e-4f58-85c8-184d2700ad3e",
