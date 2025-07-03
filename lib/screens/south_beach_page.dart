@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../models/artist.dart';
 import '../widgets/artist_card.dart';
+import '../widgets/stage_app_bar.dart';
 
 class SouthBeachPage extends StatefulWidget {
   const SouthBeachPage({super.key});
@@ -16,6 +17,13 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
   bool isLoading = true;
   String? _errorMessage;
 
+  int _currentDateIndex = 0;
+  final List<String> _availableDates = [
+    '2025-07-17',
+    '2025-07-18',
+    '2025-07-19',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -23,53 +31,54 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
   }
 
   Future<void> loadArtists() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final jsonString = await rootBundle.loadString(
         'assets/docs/artists.json',
       );
       final List<dynamic> jsonData = json.decode(jsonString);
 
-      // Filtramos los artistas del escenario South Beach con hora válida
+      final String currentDate = _availableDates[_currentDateIndex];
+
       final List<Artist> withTime =
           jsonData
               .map((json) => Artist.fromJson(json))
               .where(
                 (artist) =>
-                    artist.stage == 'South Beach' && artist.time != null,
+                    artist.stage == 'South Beach' &&
+                    artist.date == currentDate &&
+                    artist.time != null,
               )
               .toList();
 
-      // Ordenar por hora con regla nocturna
       withTime.sort((a, b) {
-        int parseHour(String time) {
+        int parseTime(String time) {
           final parts = time.split(':');
           int hour = int.parse(parts[0]);
           int minute = int.parse(parts[1]);
-
-          // Si es entre 00:00 y 05:59, lo consideramos +24h
           if (hour < 6) hour += 24;
-
           return hour * 60 + minute;
         }
 
-        return parseHour(a.time!) - parseHour(b.time!);
+        return parseTime(a.time!) - parseTime(b.time!);
       });
 
-      // Artistas sin hora (opcionalmente los puedes añadir al final)
       final List<Artist> withoutTime =
           jsonData
               .map((json) => Artist.fromJson(json))
               .where(
                 (artist) =>
-                    artist.stage == 'South Beach' && artist.time == null,
+                    artist.stage == 'South Beach' &&
+                    artist.date == currentDate &&
+                    artist.time == null,
               )
               .toList();
 
       setState(() {
-        artists = [
-          ...withTime,
-          ...withoutTime,
-        ]; // primero con hora, luego sin hora
+        artists = [...withTime, ...withoutTime];
         isLoading = false;
         _errorMessage = null;
       });
@@ -81,31 +90,44 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
     }
   }
 
+  void _changeDate(int newIndex) {
+    setState(() {
+      _currentDateIndex = newIndex;
+    });
+    loadArtists();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_errorMessage != null) {
-      return Center(child: Text(_errorMessage!));
-    }
-    if (artists.isEmpty) {
-      return const Center(child: Text('No hay artistas para South Beach Club'));
-    }
-
-    return ListView.builder(
-      itemCount: artists.length,
-      itemBuilder: (context, index) {
-        final artist = artists[index];
-        return ArtistCard(
-          artist: artist,
-          initiallyFavorite: false, // Puedes cambiarlo según si ya es fav
-          onFavoriteChanged: (isFav) {
-            // Aquí más adelante puedes guardar en Firebase o localStorage
-            print('${artist.name} es favorito: $isFav');
-          },
-        );
-      },
+    return Scaffold(
+      appBar: StageAppBar(
+        stage: 'South Beach',
+        dates: _availableDates,
+        currentIndex: _currentDateIndex,
+        onDateChanged: _changeDate,
+      ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+              ? Center(child: Text(_errorMessage!))
+              : artists.isEmpty
+              ? const Center(
+                child: Text('No hay artistas para South Beach Club'),
+              )
+              : ListView.builder(
+                itemCount: artists.length,
+                itemBuilder: (context, index) {
+                  final artist = artists[index];
+                  return ArtistCard(
+                    artist: artist,
+                    initiallyFavorite: false,
+                    onFavoriteChanged: (isFav) {
+                      print('${artist.name} es favorito: $isFav');
+                    },
+                  );
+                },
+              ),
     );
   }
 }
