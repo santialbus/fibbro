@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:myapp/widgets/artist_card.dart';
 import '../models/artist.dart';
 
 class RepsolPage extends StatefulWidget {
@@ -72,11 +73,13 @@ class _RepsolStagePageState extends State<RepsolPage> {
       itemCount: artists.length,
       itemBuilder: (context, index) {
         final artist = artists[index];
-        return ListTile(
-          title: Text(artist.name),
-          subtitle: Text(
-            '${artist.date} - ${artist.time ?? "Hora no disponible"} (${artist.genre ?? "Género no disponible"})',
-          ),
+        return ArtistCard(
+          artist: artist,
+          initiallyFavorite: false, // Puedes cambiarlo según si ya es fav
+          onFavoriteChanged: (isFav) {
+            // Aquí más adelante puedes guardar en Firebase o localStorage
+            print('${artist.name} es favorito: $isFav');
+          },
         );
       },
     );
