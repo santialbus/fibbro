@@ -15,9 +15,26 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
+      type: BottomNavigationBarType.fixed, // para más de 3 items
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Horarios'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note),
+          label: 'South Beach',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note),
+          label: 'Heineken',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritos'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note),
+          label: 'Cutty Shark',
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.music_note), label: 'Repsol'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note),
+          label: 'Rising Stars',
+        ),
       ],
     );
   }
