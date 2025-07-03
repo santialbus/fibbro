@@ -72,9 +72,7 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         isLoading = false;
         _errorMessage = null;
       });
-    } catch (e, stack) {
-      print('Error cargando artistas: $e');
-      print(stack);
+    } catch (e) {
       setState(() {
         isLoading = false;
         _errorMessage = 'Error cargando artistas';
