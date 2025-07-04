@@ -6,6 +6,7 @@ class ArtistFavoriteCard extends StatefulWidget {
   final bool initiallyFavorite;
   final void Function(bool) onFavoriteChanged;
   final bool showAlert;
+  final List<Artist> overlappingArtists;
 
   const ArtistFavoriteCard({
     super.key,
@@ -13,6 +14,7 @@ class ArtistFavoriteCard extends StatefulWidget {
     required this.initiallyFavorite,
     required this.onFavoriteChanged,
     this.showAlert = false,
+    this.overlappingArtists = const [],
   });
 
   @override
@@ -74,12 +76,11 @@ class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
               ),
               onPressed: _toggleFavorite,
             ),
-            if (widget.showAlert)
-              const Icon(Icons.error_outline, color: Colors.redAccent)
-            else
-              Opacity(
-                opacity: 0.0,
-                child: Icon(Icons.error_outline, color: Colors.redAccent),
+            if (widget.showAlert && widget.overlappingArtists.isNotEmpty)
+              Tooltip(
+                message:
+                    'Solapa con: ${widget.overlappingArtists.map((a) => a.name).join(', ')}',
+                child: const Icon(Icons.error_outline, color: Colors.redAccent),
               ),
           ],
         ),

@@ -29,6 +29,45 @@ class _FavoritesPageState extends State<FavoritesPage> {
   ];
   int _currentDateIndex = 0;
 
+  Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
+    Map<String, List<String>> solapamientos = {};
+
+    int tiempoEnMinutos(String time) {
+      final parts = time.split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1]);
+      if (hour < 6) hour += 24;
+      return hour * 60 + minute;
+    }
+
+    List<Map<String, dynamic>> rangos =
+        artistas.map((artist) {
+          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
+          int duracion = artist.duration ?? 0;
+          int fin = inicio + duracion;
+          return {'id': artist.id, 'inicio': inicio, 'fin': fin};
+        }).toList();
+
+    for (int i = 0; i < rangos.length; i++) {
+      for (int j = i + 1; j < rangos.length; j++) {
+        final a = rangos[i];
+        final b = rangos[j];
+
+        bool seSolapan = (a['inicio'] < b['fin']) && (b['inicio'] < a['fin']);
+
+        if (seSolapan) {
+          solapamientos.putIfAbsent(a['id'], () => []);
+          solapamientos.putIfAbsent(b['id'], () => []);
+
+          solapamientos[a['id']]!.add(b['id']);
+          solapamientos[b['id']]!.add(a['id']);
+        }
+      }
+    }
+
+    return solapamientos;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -180,8 +219,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final artistsOfDay =
         favoriteArtists.where((artist) => artist.date == currentDate).toList();
 
-    // Detectar artistas con solapamientos
-    final artistasConAlerta = detectarSolapamientos(artistsOfDay);
+    final solapadosMap = artistasSolapados(artistsOfDay);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mis favoritos'), centerTitle: true),
@@ -192,6 +230,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               ? const Center(child: Text('Aún no has añadido favoritos'))
               : Column(
                 children: [
+                  // Selector de fecha (flechas + texto)
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 12,
@@ -229,12 +268,21 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       itemCount: artistsOfDay.length,
                       itemBuilder: (context, index) {
                         final artist = artistsOfDay[index];
+                        final overlappingIds = solapadosMap[artist.id] ?? [];
+                        final overlappingArtists =
+                            overlappingIds
+                                .map(
+                                  (id) => artistsOfDay.firstWhere(
+                                    (a) => a.id == id,
+                                  ),
+                                )
+                                .toList();
+
                         return ArtistFavoriteCard(
                           artist: artist,
                           initiallyFavorite: true,
-                          showAlert: artistasConAlerta.contains(
-                            artist.id,
-                          ), // aquí pasas el flag
+                          showAlert: overlappingArtists.isNotEmpty,
+                          overlappingArtists: overlappingArtists,
                           onFavoriteChanged: (isFav) async {
                             await _favoriteService.toggleFavorite(
                               artistId: artist.id,
