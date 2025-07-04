@@ -237,37 +237,37 @@
       "id": "cfd057fb-fc2e-4f58-85c8-184d2700ad3e",
       "name": "Foster the People",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:30",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "325f5b6e-c77a-49f3-b723-cb88f9798596",
       "name": "Love of Lesbian",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:05",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 85
     },
     {
       "id": "a8f7f92a-fad0-40e1-a90f-df92d50b8a6c",
       "name": "Ginebras",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Pop Rock",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "7ae15f2c-9095-49b8-a93c-d5f3d167f3b1",
       "name": "León Benavente",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:20",
+      "genre": "Rock",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "f88132ed-bbfd-409e-8c95-d4b2053f688c",
@@ -282,91 +282,100 @@
       "id": "c21eea89-5974-47f7-817c-113c88a9c437",
       "name": "Maxïmo Park",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Pop",
+      "stage": "Repsol", 
+  "duration": 60
     },
     {
       "id": "83c01e38-ea6e-442e-8e8b-00baf597b93f",
       "name": "Ella Eyre",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:35",
+      "genre": "Indie",
+      "stage": "Repsol", 
+  "duration": 80
     },
     {
       "id": "30e263d5-ecdf-4e99-800c-1bc215846cc3",
       "name": "Elyella",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:45",
+      "genre": "Pop",
+      "stage": "Heineken", 
+  "duration": 75
     },
     {
       "id": "0b60e1a5-0d27-41b1-90aa-7e0888b11cb5",
       "name": "Cupido",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "9fefdc15-3624-42ae-b216-8df287a3cb9f",
       "name": "The K's",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:15",
+      "genre": "Rock",
+      "stage": "Repsol", 
+  "duration": 80
     },
     {
       "id": "d8b527e2-dc1d-4bd8-b4f0-1f0f88a61170",
       "name": "Javiera Mena",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Pop",
+      "stage": "Cutty Shark", 
+  "duration": 60
     },
     {
       "id": "c4790a36-23cc-4074-a9bb-e58be67ebc2d",
       "name": "Dillom",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:15",
+      "genre": "Pop",
+      "stage": "Rising Stars", 
+  "duration": 65
     },
     {
       "id": "60cf19f4-20f4-4cc3-a4f2-c9d4f930c40a",
       "name": "Malmö 040",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:35",
+      "genre": "Indie",
+      "stage": "Cutty Shark", 
+  "duration": 75
+    },
+    {
+      "id": "60cf19f4-20f4-4cc3-a4f2-g423ntre4932",
+      "name": "Tiga",
+      "date": "2025-07-18",
+      "time": "03:45",
+      "genre": "Pop",
+      "stage": "Cutty Shark", 
+  "duration": 65
     },
     {
       "id": "3809c86b-8e1f-4cb0-a176-b8d0b174a60a",
       "name": "Los Punsetes",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Indie rock",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "8e82d303-9476-48fa-9212-9c93f960137b",
       "name": "La Milagrosa",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Pop Rock",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "826c6e5f-d38c-4714-bb07-e88932db04cb",
@@ -381,19 +390,19 @@
       "id": "d4cf93b9-b991-4c89-98f7-f0f3f1521a44",
       "name": "Innmir",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:50",
+      "genre": "Electo",
+      "stage": "Repsol", 
+  "duration": 70
     },
     {
       "id": "0b251504-98bb-4a6b-8779-343a9aaeb0c0",
       "name": "Valiente Bosque",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:55",
+      "genre": "Rock",
+      "stage": "Rising Stars", 
+  "duration": 50
     },
     {
       "id": "90df18eb-6e9e-40d4-a171-8ff3fa9930c1",
@@ -426,208 +435,208 @@
       "id": "db91bc9f-4b96-4a68-9a76-04d59ef9b746",
       "name": "Dario Mendez",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 45
     },
     {
       "id": "d8b5de2f-4571-4ebf-95ce-c9dd7b3c2aa7",
       "name": "Hunne",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "80e9f79a-3c1c-4f40-8f3c-4a3055b13d1c",
       "name": "Luuk van Dijk",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "2c3195a6-2b07-4c00-987c-fcbcc37c83f5",
       "name": "Max Dean",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "9aa2a723-0424-45c2-a933-d841af3dcb1e",
       "name": "Sosa",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "7e9c8ac1-4f9d-471c-8a5a-69a168229c6e",
       "name": "The Black Keys",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:20",
+      "genre": "Rock n roll",
+      "stage": "Heineken", 
+  "duration": 80
     },
     {
       "id": "6b30e3a5-2735-4b31-b89a-6c7d0588f7ae",
       "name": "Residente",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Mestizaje",
+      "stage": "Heineken", 
+  "duration": 65
     },
     {
       "id": "af0407e6-3ad3-426c-b63e-32f2e3f506a4",
       "name": "Viva Suecia",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "22:05",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 85
     },
     {
       "id": "0c2c4b0f-3f8e-4d04-a274-cf0e67d9ef31",
       "name": "Tom Meighan",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:15",
+      "genre": "Rock n roll",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "44299b61-3a8a-4e20-9ef4-20771b0096b4",
       "name": "Siloé",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:50",
+      "genre": "Indie",
+      "stage": "Heineken", 
+  "duration": 70
     },
     {
       "id": "5d6eec4a-507e-4663-858f-24eab92aab34",
       "name": "Ojete Calor",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:15",
+      "genre": "Pop",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "2bb21ad7-cf3b-43ec-a0f2-23d15d7b4cc5",
       "name": "Iván Ferreiro",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Pop",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "c1b4d26b-4969-4e8e-b0b5-055570f91de7",
       "name": "Califato 3/4",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:40",
+      "genre": "Indie rock",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "a2ae1316-8b36-46a9-b0c2-60ee91c8ef79",
       "name": "Hot Chip",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:45",
+      "genre": "Electro",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "d9cf5082-6d60-4d9c-bf55-48fd77d0cbe3",
       "name": "Depedro",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Rock",
+      "stage": "Cutty Shark", 
+  "duration": 60
     },
     {
       "id": "f3063b43-d9de-499e-b22a-5c82db408e29",
       "name": "Mushkaa",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:40",
+      "genre": "Indie rock",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "3f27fc96-d038-4bdb-a0d3-d85d44d1a83f",
       "name": "Karavana",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:45",
+      "genre": "Indie rock",
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "2483e8f2-e8fa-4cf5-800f-e7084c3560d5",
       "name": "The Lathums",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Rock",
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "4dcf8c33-9e52-4f2b-a60b-f789357e2f26",
       "name": "Hinds",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:30",
+      "genre": "Indie rock",
+      "stage": "Rising Stars", 
+  "duration": 70
     },
     {
       "id": "6f04c28f-9291-4cfd-8320-8e0a46fc60c7",
       "name": "Ultraligera",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "19:00",
+      "genre": "Indie rock",
+      "stage": "Repsol", 
+  "duration": 60
     },
     {
       "id": "d83e38bb-7d0c-4456-9cc7-1c3b7297161a",
       "name": "Jimena Amarillo",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Pop",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "8025c6fa-4df2-448c-9f95-e8acfb1e3062",
       "name": "Shego",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Indie rock",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "3ac8c190-97db-4c17-b4c2-00ef57374b20",
       "name": "Ikarûs",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "02:55",
+      "genre": "Indie",
+      "stage": "Rising Stars", 
+  "duration": 55
     },
     {
       "id": "c8c774e3-2c3a-48d0-b1d1-327d8d53a2cb",
@@ -660,46 +669,46 @@
       "id": "0b1db162-d147-4d4a-9cd2-760c2d053a5e",
       "name": "Ben Sterling",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "21:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "b58d6a90-3f84-48ef-b43f-89cd3959c4e6",
       "name": "Cuartero",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "23:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "8ff2f342-96d4-4147-b27f-64d002635e56",
       "name": "John Talbot",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "03:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     },
     {
       "id": "dc65746b-2bfb-4e47-ae94-0d1486eeea7f",
       "name": "Ladrillovitz",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "20:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 60
     },
     {
       "id": "e6b62257-8705-4622-bd1a-e85f2382dc15",
       "name": "Maceo Plex",
       "date": "2025-07-19",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "01:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 120
     }
   ]
   
