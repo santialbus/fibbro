@@ -1,38 +1,57 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'favorites_page.dart';
-import 'south_beach_page.dart';
-import 'heineken_stage_page.dart';
-import 'cutty_shark_page.dart';
-import 'repsol_page.dart';
-import 'rising_stars_page.dart';
-import '../widgets/bottom_nav_bar.dart';
+import 'package:myapp/widgets/festival_card.dart'; // Asegúrate de importar correctamente
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _index = 0;
-
-  final List<Widget> _pages = const [
-    SouthBeachPage(),
-    HeinekenStagePage(),
-    FavoritesPage(),
-    CuttySharkPage(),
-    RepsolPage(),
-    RisingStarsPage(),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_index],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+      appBar: AppBar(
+        title: const Text('onStagee'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // De momento inoperativo
+            },
+          ),
+        ],
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('festivales').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error al cargar festivales'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(child: Text('No hay festivales disponibles.'));
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data() as Map<String, dynamic>;
+
+              return FestivalCard(
+                name: (data['name'] ?? '').toString(),
+                year: (data['year'] ?? '').toString(),
+                dates: List<String>.from(data['dates'] ?? []),
+                city: (data['city'] ?? '').toString(),
+                country: (data['country'] ?? '').toString(),
+                imageUrl: data['imageUrl'],
+              );
+            },
+          );
+        },
       ),
     );
   }
