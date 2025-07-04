@@ -47,7 +47,7 @@ class _ArtistCardState extends State<ArtistCard> {
         ),
         trailing: IconButton(
           icon: Icon(
-            isFavorite ? Icons.star : Icons.favorite_border,
+            isFavorite ? Icons.star : Icons.star_border,
             color: isFavorite ? Colors.amber : null,
           ),
           onPressed: _toggleFavorite,

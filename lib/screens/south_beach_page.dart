@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../models/artist.dart';
 import '../widgets/artist_card.dart';
 import '../widgets/stage_app_bar.dart';
+import '../services/favorite_service.dart';
 
 class SouthBeachPage extends StatefulWidget {
   const SouthBeachPage({super.key});
@@ -14,6 +15,7 @@ class SouthBeachPage extends StatefulWidget {
 
 class _SouthBeachPageState extends State<SouthBeachPage> {
   List<Artist> artists = [];
+  Set<String> favoriteArtistIds = {}; // 🔥 Aquí se almacenan los favoritos
   bool isLoading = true;
   String? _errorMessage;
 
@@ -23,6 +25,9 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
     '2025-07-18',
     '2025-07-19',
   ];
+
+  final FavoriteService favoriteService = FavoriteService();
+  final String festivalId = '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
 
   @override
   void initState() {
@@ -40,19 +45,15 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         'assets/docs/artists.json',
       );
       final List<dynamic> jsonData = json.decode(jsonString);
-
       final String currentDate = _availableDates[_currentDateIndex];
 
-      final List<Artist> withTime =
-          jsonData
-              .map((json) => Artist.fromJson(json))
-              .where(
-                (artist) =>
-                    artist.stage == 'South Beach' &&
-                    artist.date == currentDate &&
-                    artist.time != null,
-              )
-              .toList();
+      final List<Artist> withTime = jsonData
+          .map((json) => Artist.fromJson(json))
+          .where((artist) =>
+              artist.stage == 'South Beach' &&
+              artist.date == currentDate &&
+              artist.time != null)
+          .toList();
 
       withTime.sort((a, b) {
         int parseTime(String time) {
@@ -66,19 +67,23 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         return parseTime(a.time!) - parseTime(b.time!);
       });
 
-      final List<Artist> withoutTime =
-          jsonData
-              .map((json) => Artist.fromJson(json))
-              .where(
-                (artist) =>
-                    artist.stage == 'South Beach' &&
-                    artist.date == currentDate &&
-                    artist.time == null,
-              )
-              .toList();
+      final List<Artist> withoutTime = jsonData
+          .map((json) => Artist.fromJson(json))
+          .where((artist) =>
+              artist.stage == 'South Beach' &&
+              artist.date == currentDate &&
+              artist.time == null)
+          .toList();
+
+      final List<Artist> all = [...withTime, ...withoutTime];
+
+      // 🔥 Obtener favoritos del usuario para este festival
+      final favs = await favoriteService.getFavoritesForFestival(festivalId);
+      final favIds = favs.map((doc) => doc['artistId'] as String).toSet();
 
       setState(() {
-        artists = [...withTime, ...withoutTime];
+        artists = all;
+        favoriteArtistIds = favIds;
         isLoading = false;
         _errorMessage = null;
       });
@@ -106,28 +111,40 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         currentIndex: _currentDateIndex,
         onDateChanged: _changeDate,
       ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _errorMessage != null
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
               ? Center(child: Text(_errorMessage!))
               : artists.isEmpty
-              ? const Center(
-                child: Text('No hay artistas para South Beach Club'),
-              )
-              : ListView.builder(
-                itemCount: artists.length,
-                itemBuilder: (context, index) {
-                  final artist = artists[index];
-                  return ArtistCard(
-                    artist: artist,
-                    initiallyFavorite: false,
-                    onFavoriteChanged: (isFav) {
-                      print('${artist.name} es favorito: $isFav');
-                    },
-                  );
-                },
-              ),
+                  ? const Center(
+                      child: Text('No hay artistas para South Beach Club'),
+                    )
+                  : ListView.builder(
+                      itemCount: artists.length,
+                      itemBuilder: (context, index) {
+                        final artist = artists[index];
+                        final isFav = favoriteArtistIds.contains(artist.id);
+
+                        return ArtistCard(
+                          artist: artist,
+                          initiallyFavorite: isFav,
+                          onFavoriteChanged: (isNowFav) async {
+                            await favoriteService.toggleFavorite(
+                              festivalId: festivalId,
+                              artistId: artist.id,
+                            );
+
+                            setState(() {
+                              if (isNowFav) {
+                                favoriteArtistIds.add(artist.id);
+                              } else {
+                                favoriteArtistIds.remove(artist.id);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
     );
   }
 }
