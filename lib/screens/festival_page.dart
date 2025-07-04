@@ -25,6 +25,9 @@ class _FestivalPageState extends State<FestivalPage> {
   int _index = 0;
   bool _pressed = false;
 
+  // Posición inicial del FAB
+  Offset fabPosition = const Offset(20, 500); // ajusta según pantalla y diseño
+
   final List<Widget> _pages = const [
     SouthBeachPage(),
     HeinekenStagePage(),
@@ -48,42 +51,58 @@ class _FestivalPageState extends State<FestivalPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Para limitar el movimiento dentro de la pantalla:
+    final screenSize = MediaQuery.of(context).size;
+    final fabSize = 72.0; // tamaño del FAB para el cálculo del límite
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.festivalName), centerTitle: true),
       body: Stack(
         children: [
           _pages[_index],
+          // FAB draggable
           Positioned(
-            bottom: 5,
-            left: 0,
-            right: 0,
-            child: Center(
+            left: fabPosition.dx,
+            top: fabPosition.dy,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  double newX = fabPosition.dx + details.delta.dx;
+                  double newY = fabPosition.dy + details.delta.dy;
+
+                  // Limitar para que no salga de pantalla
+                  newX = newX.clamp(0.0, screenSize.width - fabSize);
+                  newY = newY.clamp(
+                    0.0,
+                    screenSize.height - fabSize - kToolbarHeight,
+                  ); // resta AppBar altura
+
+                  fabPosition = Offset(newX, newY);
+                });
+              },
+              onTap: _onFavoritePressed,
               child: AnimatedScale(
                 scale: _pressed ? 0.9 : 1.0,
                 duration: const Duration(milliseconds: 150),
                 child: Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(100),
-                    onTap: _onFavoritePressed,
-                    child: Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Colors.amber,
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.star,
-                        size: 28,
-                        color: Colors.white,
-                      ),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.star,
+                      size: 28,
+                      color: Colors.white,
                     ),
                   ),
                 ),
