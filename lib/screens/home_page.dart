@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/festival_page.dart';
 import 'package:myapp/widgets/festival_card.dart'; // Asegúrate de importar correctamente
 
 class HomePage extends StatelessWidget {
@@ -44,10 +45,26 @@ class HomePage extends StatelessWidget {
               return FestivalCard(
                 name: (data['name'] ?? '').toString(),
                 year: (data['year'] ?? '').toString(),
-                dates: List<String>.from(data['dates'] ?? []),
-                city: (data['city'] ?? '').toString(),
-                country: (data['country'] ?? '').toString(),
+                dates: List<String>.from(data['date'] ?? []),
+                city: (data['ciudad'] ?? '').toString(),
+                country: (data['pais'] ?? '').toString(),
                 imageUrl: data['imageUrl'],
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => FestivalPage(
+                            festivalId:
+                                docs[index]
+                                    .id, // o data['id'] si lo tienes en el documento
+                            festivalName:
+                                (data['name'] ?? '')
+                                    .toString(), // Le pasas toda la info o solo lo que necesites
+                          ),
+                    ),
+                  );
+                },
               );
             },
           );

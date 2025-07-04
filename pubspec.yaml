@@ -39,7 +39,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/docs/artists.json
-    - assets/images/default.PNG
+    - assets/images/
 
   uses-material-design: true
 

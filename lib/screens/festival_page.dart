@@ -8,7 +8,14 @@ import 'rising_stars_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 class FestivalPage extends StatefulWidget {
-  const FestivalPage({super.key});
+  final String festivalId;
+  final String festivalName;
+
+  const FestivalPage({
+    super.key,
+    required this.festivalId,
+    required this.festivalName,
+  });
 
   @override
   State<FestivalPage> createState() => _FestivalPageState();
@@ -29,6 +36,7 @@ class _FestivalPageState extends State<FestivalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text(widget.festivalName)),
       body: _pages[_index],
       bottomNavigationBar: BottomNavBar(
         currentIndex: _index,
