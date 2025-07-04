@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import '../models/artist.dart';
 
-class ArtistCard extends StatefulWidget {
+class ArtistFavoriteCard extends StatefulWidget {
   final Artist artist;
   final bool initiallyFavorite;
   final void Function(bool) onFavoriteChanged;
+  final bool showAlert;
 
-  const ArtistCard({
+  const ArtistFavoriteCard({
     super.key,
     required this.artist,
     required this.initiallyFavorite,
     required this.onFavoriteChanged,
+    this.showAlert = false,
   });
 
   @override
-  State<ArtistCard> createState() => _ArtistCardState();
+  State<ArtistFavoriteCard> createState() => _ArtistFavoriteCardState();
 }
 
-class _ArtistCardState extends State<ArtistCard> {
+class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
   late bool isFavorite;
 
   @override
@@ -58,17 +60,28 @@ class _ArtistCardState extends State<ArtistCard> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(widget.artist.name, style: const TextStyle(fontSize: 18)),
         subtitle: Text(
-          '${widget.artist.time ?? "Hora no disponible"}'
-          '${widget.artist.duration != null ? " - ${getEndTime(widget.artist.time, widget.artist.duration)}" : ""}\n'
+          '${widget.artist.time} -  ${getEndTime(widget.artist.time, widget.artist.duration)}\n'
+          '${widget.artist.stage}\n'
           '${widget.artist.genre ?? "Género no disponible"}',
         ),
-
-        trailing: IconButton(
-          icon: Icon(
-            isFavorite ? Icons.star : Icons.star_border,
-            color: isFavorite ? Colors.amber : null,
-          ),
-          onPressed: _toggleFavorite,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                color: isFavorite ? Colors.amber : null,
+              ),
+              onPressed: _toggleFavorite,
+            ),
+            if (widget.showAlert)
+              const Icon(Icons.error_outline, color: Colors.redAccent)
+            else
+              Opacity(
+                opacity: 0.0,
+                child: Icon(Icons.error_outline, color: Colors.redAccent),
+              ),
+          ],
         ),
       ),
     );

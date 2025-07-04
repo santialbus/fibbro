@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/artist.dart';
-import '../widgets/artist_card.dart';
+import '../widgets/artist_favorite_card.dart';
 import '../services/favorite_service.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -69,6 +69,45 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final monthName = months[date.month - 1];
 
     return '$dayName, $day de $monthName';
+  }
+
+  Set<String> detectarSolapamientos(List<Artist> artistas) {
+    Set<String> artistasConConflicto = {};
+
+    // Convertir start y end a minutos desde medianoche para comparación
+    int tiempoEnMinutos(String time) {
+      final parts = time.split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1]);
+      if (hour < 6) hour += 24;
+      return hour * 60 + minute;
+    }
+
+    // Obtener rango de cada artista: inicio y fin
+    List<Map<String, dynamic>> rangos =
+        artistas.map((artist) {
+          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
+          int duracion = artist.duration ?? 0;
+          int fin = inicio + duracion;
+          return {'id': artist.id, 'inicio': inicio, 'fin': fin};
+        }).toList();
+
+    // Comparar pares para solapamientos
+    for (int i = 0; i < rangos.length; i++) {
+      for (int j = i + 1; j < rangos.length; j++) {
+        final a = rangos[i];
+        final b = rangos[j];
+
+        bool seSolapan = (a['inicio'] < b['fin']) && (b['inicio'] < a['fin']);
+
+        if (seSolapan) {
+          artistasConConflicto.add(a['id']);
+          artistasConConflicto.add(b['id']);
+        }
+      }
+    }
+
+    return artistasConConflicto;
   }
 
   Future<void> loadFavorites() async {
@@ -141,6 +180,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final artistsOfDay =
         favoriteArtists.where((artist) => artist.date == currentDate).toList();
 
+    // Detectar artistas con solapamientos
+    final artistasConAlerta = detectarSolapamientos(artistsOfDay);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Mis favoritos'), centerTitle: true),
       body:
@@ -187,9 +229,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       itemCount: artistsOfDay.length,
                       itemBuilder: (context, index) {
                         final artist = artistsOfDay[index];
-                        return ArtistCard(
+                        return ArtistFavoriteCard(
                           artist: artist,
                           initiallyFavorite: true,
+                          showAlert: artistasConAlerta.contains(
+                            artist.id,
+                          ), // aquí pasas el flag
                           onFavoriteChanged: (isFav) async {
                             await _favoriteService.toggleFavorite(
                               artistId: artist.id,

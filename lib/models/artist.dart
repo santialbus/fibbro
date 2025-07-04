@@ -25,7 +25,7 @@ class Artist {
       time: json['time'],
       genre: json['genre'],
       stage: json['stage'],
-      duration: json['duration'] != null ? json['duration'] as int : null,
+      duration: json['duration'] as int?,
     );
   }
 }
