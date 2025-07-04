@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../models/artist.dart';
 import '../widgets/artist_card.dart';
 import '../widgets/stage_app_bar.dart';
+import '../services/favorite_service.dart';
 
 class RepsolPage extends StatefulWidget {
   const RepsolPage({super.key});
@@ -14,6 +15,7 @@ class RepsolPage extends StatefulWidget {
 
 class _RepsolPageState extends State<RepsolPage> {
   List<Artist> artists = [];
+  Set<String> favoriteArtistIds = {}; // 🔥 Aquí se almacenan los favoritos
   bool isLoading = true;
   String? _errorMessage;
 
@@ -23,6 +25,9 @@ class _RepsolPageState extends State<RepsolPage> {
     '2025-07-18',
     '2025-07-19',
   ];
+
+  final FavoriteService favoriteService = FavoriteService();
+  final String festivalId = '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
 
   @override
   void initState() {
@@ -40,7 +45,6 @@ class _RepsolPageState extends State<RepsolPage> {
         'assets/docs/artists.json',
       );
       final List<dynamic> jsonData = json.decode(jsonString);
-
       final String currentDate = _availableDates[_currentDateIndex];
 
       final List<Artist> withTime =
@@ -77,8 +81,15 @@ class _RepsolPageState extends State<RepsolPage> {
               )
               .toList();
 
+      final List<Artist> all = [...withTime, ...withoutTime];
+
+      // 🔥 Obtener favoritos del usuario para este festival
+      final favs = await favoriteService.getFavoritesForFestival(festivalId);
+      final favIds = favs.map((doc) => doc['artistId'] as String).toSet();
+
       setState(() {
-        artists = [...withTime, ...withoutTime];
+        artists = all;
+        favoriteArtistIds = favIds;
         isLoading = false;
         _errorMessage = null;
       });
@@ -117,11 +128,24 @@ class _RepsolPageState extends State<RepsolPage> {
                 itemCount: artists.length,
                 itemBuilder: (context, index) {
                   final artist = artists[index];
+                  final isFav = favoriteArtistIds.contains(artist.id);
+
                   return ArtistCard(
                     artist: artist,
-                    initiallyFavorite: false,
-                    onFavoriteChanged: (isFav) {
-                      print('${artist.name} es favorito: $isFav');
+                    initiallyFavorite: isFav,
+                    onFavoriteChanged: (isNowFav) async {
+                      await favoriteService.toggleFavorite(
+                        festivalId: festivalId,
+                        artistId: artist.id,
+                      );
+
+                      setState(() {
+                        if (isNowFav) {
+                          favoriteArtistIds.add(artist.id);
+                        } else {
+                          favoriteArtistIds.remove(artist.id);
+                        }
+                      });
                     },
                   );
                 },
