@@ -87,4 +87,18 @@ class FavoriteService {
 
     return favQuery.docs;
   }
+  
+  Future<List<String>> getFavoriteArtistIdsForUser({
+  required String userId,
+  required String festivalId,
+}) async {
+  final favs = await _firestore
+      .collection('favorites')
+      .where('userId', isEqualTo: userId)
+      .where('festivalId', isEqualTo: festivalId)
+      .get();
+
+  return favs.docs.map((doc) => doc['artistId'] as String).toList();
+}
+
 }
