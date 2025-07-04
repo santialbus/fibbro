@@ -1,4 +1,4 @@
-package com.example.myapp
+package com.albustech.onstagee
 
 import io.flutter.embedding.android.FlutterActivity
 
