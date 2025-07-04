@@ -1,20 +1,28 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:myapp/widgets/artist_card.dart';
 import '../models/artist.dart';
+import '../widgets/artist_card.dart';
+import '../widgets/stage_app_bar.dart';
 
 class RepsolPage extends StatefulWidget {
   const RepsolPage({super.key});
 
   @override
-  State<RepsolPage> createState() => _RepsolStagePageState();
+  State<RepsolPage> createState() => _RepsolPageState();
 }
 
-class _RepsolStagePageState extends State<RepsolPage> {
+class _RepsolPageState extends State<RepsolPage> {
   List<Artist> artists = [];
   bool isLoading = true;
   String? _errorMessage;
+
+  int _currentDateIndex = 0;
+  final List<String> _availableDates = [
+    '2025-07-17',
+    '2025-07-18',
+    '2025-07-19',
+  ];
 
   @override
   void initState() {
@@ -23,24 +31,54 @@ class _RepsolStagePageState extends State<RepsolPage> {
   }
 
   Future<void> loadArtists() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final jsonString = await rootBundle.loadString(
         'assets/docs/artists.json',
       );
       final List<dynamic> jsonData = json.decode(jsonString);
 
-      final filteredArtists =
+      final String currentDate = _availableDates[_currentDateIndex];
+
+      final List<Artist> withTime =
           jsonData
               .map((json) => Artist.fromJson(json))
-              .where((artist) => artist.stage == 'Repsol')
+              .where(
+                (artist) =>
+                    artist.stage == 'Repsol' &&
+                    artist.date == currentDate &&
+                    artist.time != null,
+              )
               .toList();
 
-      filteredArtists.sort((a, b) {
-        return _getSortableHour(a.time).compareTo(_getSortableHour(b.time));
+      withTime.sort((a, b) {
+        int parseTime(String time) {
+          final parts = time.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          if (hour < 6) hour += 24;
+          return hour * 60 + minute;
+        }
+
+        return parseTime(a.time!) - parseTime(b.time!);
       });
 
+      final List<Artist> withoutTime =
+          jsonData
+              .map((json) => Artist.fromJson(json))
+              .where(
+                (artist) =>
+                    artist.stage == 'Repsol' &&
+                    artist.date == currentDate &&
+                    artist.time == null,
+              )
+              .toList();
+
       setState(() {
-        artists = filteredArtists;
+        artists = [...withTime, ...withoutTime];
         isLoading = false;
         _errorMessage = null;
       });
@@ -52,36 +90,42 @@ class _RepsolStagePageState extends State<RepsolPage> {
     }
   }
 
-  int _getSortableHour(String? time) {
-    if (time == null) return 9999;
-    final parts = time.split(':');
-    final hour = int.tryParse(parts[0]) ?? 0;
-    final minute = int.tryParse(parts[1]) ?? 0;
-    final totalMinutes = hour * 60 + minute;
-    return totalMinutes < 360 ? totalMinutes + 1440 : totalMinutes;
+  void _changeDate(int newIndex) {
+    setState(() {
+      _currentDateIndex = newIndex;
+    });
+    loadArtists();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Center(child: CircularProgressIndicator());
-    if (_errorMessage != null) return Center(child: Text(_errorMessage!));
-    if (artists.isEmpty) {
-      return const Center(child: Text('No hay artistas para Repsol'));
-    }
-
-    return ListView.builder(
-      itemCount: artists.length,
-      itemBuilder: (context, index) {
-        final artist = artists[index];
-        return ArtistCard(
-          artist: artist,
-          initiallyFavorite: false, // Puedes cambiarlo según si ya es fav
-          onFavoriteChanged: (isFav) {
-            // Aquí más adelante puedes guardar en Firebase o localStorage
-            print('${artist.name} es favorito: $isFav');
-          },
-        );
-      },
+    return Scaffold(
+      appBar: StageAppBar(
+        stage: 'Repsol',
+        dates: _availableDates,
+        currentIndex: _currentDateIndex,
+        onDateChanged: _changeDate,
+      ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+              ? Center(child: Text(_errorMessage!))
+              : artists.isEmpty
+              ? const Center(child: Text('No hay artistas para Repsol'))
+              : ListView.builder(
+                itemCount: artists.length,
+                itemBuilder: (context, index) {
+                  final artist = artists[index];
+                  return ArtistCard(
+                    artist: artist,
+                    initiallyFavorite: false,
+                    onFavoriteChanged: (isFav) {
+                      print('${artist.name} es favorito: $isFav');
+                    },
+                  );
+                },
+              ),
     );
   }
 }

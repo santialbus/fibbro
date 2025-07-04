@@ -39,10 +39,16 @@ class StageAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Text(
                 dates[currentIndex],
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               IconButton(
-                onPressed: currentIndex < dates.length - 1 ? () => _changeDate(true) : null,
+                onPressed:
+                    currentIndex < dates.length - 1
+                        ? () => _changeDate(true)
+                        : null,
                 icon: const Icon(Icons.arrow_right),
               ),
             ],
