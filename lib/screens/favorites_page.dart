@@ -8,7 +8,7 @@ import '../widgets/artist_favorite_card.dart';
 import '../services/favorite_service.dart';
 
 class FavoritesPage extends StatefulWidget {
-  const FavoritesPage({super.key});
+  const FavoritesPage({super.key, required String festivalId});
 
   @override
   State<FavoritesPage> createState() => _FavoritesPageState();
@@ -169,6 +169,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       final jsonString = await rootBundle.loadString(
         'assets/docs/artists.json',
       );
+
       final List<dynamic> jsonData = json.decode(jsonString);
       final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
 
@@ -222,7 +223,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final solapadosMap = artistasSolapados(artistsOfDay);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis favoritos'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Mis favoritos'),
+        centerTitle: true,
+      ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -230,7 +234,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
               ? const Center(child: Text('Aún no has añadido favoritos'))
               : Column(
                 children: [
-                  // Selector de fecha (flechas + texto)
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 12,

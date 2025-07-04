@@ -26,6 +26,7 @@ class StageAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(stage),
       centerTitle: true,
+      automaticallyImplyLeading: false,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(40),
         child: Padding(
@@ -35,13 +36,13 @@ class StageAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               IconButton(
                 onPressed: currentIndex > 0 ? () => _changeDate(false) : null,
-                icon: const Icon(Icons.arrow_left),
+                icon: const Icon(Icons.chevron_left),
               ),
               Text(
                 dates[currentIndex],
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               IconButton(
@@ -49,7 +50,7 @@ class StageAppBar extends StatelessWidget implements PreferredSizeWidget {
                     currentIndex < dates.length - 1
                         ? () => _changeDate(true)
                         : null,
-                icon: const Icon(Icons.arrow_right),
+                icon: const Icon(Icons.chevron_right),
               ),
             ],
           ),

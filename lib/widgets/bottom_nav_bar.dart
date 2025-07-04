@@ -25,7 +25,6 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.music_note),
           label: 'Heineken',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritos'),
         BottomNavigationBarItem(
           icon: Icon(Icons.music_note),
           label: 'Cutty Shark',
