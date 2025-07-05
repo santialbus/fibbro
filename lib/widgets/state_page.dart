@@ -35,83 +35,74 @@ class _StagePageState extends State<StagePage> {
     loadArtists();
   }
 
+  String convertDateFormat(String date) {
+  final parts = date.split('/');
+  if (parts.length == 3) {
+    final day = parts[0].padLeft(2, '0');
+    final month = parts[1].padLeft(2, '0');
+    final year = parts[2];
+    return '$year-$month-$day';
+  }
+  return date; // fallback si ya está bien
+}
+
   Future<void> loadArtists() async {
     setState(() => isLoading = true);
 
     try {
-      // 1. Obtener el festival
-      final festivalDoc =
+      final String currentDateRaw = widget.dates[currentDateIndex];
+      final String currentDate = convertDateFormat(currentDateRaw);      print('Cargando artistas para:');
+      print('Festival: ${widget.festivalId}');
+      print('Stage: ${widget.stageName}');
+      print('Date: $currentDate');
+
+      // 🔥 Nueva consulta directa por campos
+      final querySnapshot =
           await FirebaseFirestore.instance
-              .collection('festivales')
-              .doc(widget.festivalId)
+              .collection('artists')
+              .where('id_festival', isEqualTo: widget.festivalId.trim())
+              .where('stage', isEqualTo: widget.stageName)
+              .where('date', isEqualTo: currentDate)
               .get();
 
-      if (!festivalDoc.exists) throw Exception('Festival no encontrado');
+      print('Artistas encontrados: ${querySnapshot.docs.length}');
 
-      // Imprimir los datos del festival para ver estructura
-      print('Datos festival: ${festivalDoc.data()}');
+      final List<Artist> allArtists =
+          querySnapshot.docs.map((doc) {
+            final data = doc.data();
+            return Artist.fromJson({...data, 'id': doc.id});
+          }).toList();
 
-      // Confirmar que el campo es 'artistIds' o el correcto:
-      final List<dynamic>? artistIdsDynamic = festivalDoc.data()?['artistIds'];
-      if (artistIdsDynamic == null) {
-        throw Exception('Campo artistIds no encontrado en el festival');
-      }
+      // Separar por time
+      final withTime = allArtists.where((a) => a.time != null).toList();
+      final withoutTime = allArtists.where((a) => a.time == null).toList();
 
-      // Pasar a List<String> asegurando que sean strings
-      final List<String> artistIds =
-          artistIdsDynamic.map((e) => e.toString()).toList();
+      withTime.sort((a, b) {
+        int parseTime(String time) {
+          final parts = time.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          if (hour < 6) hour += 24;
+          return hour * 60 + minute;
+        }
 
-      print('IDs artistas del festival: $artistIds');
+        return parseTime(a.time!) - parseTime(b.time!);
+      });
 
-      if (artistIds.isEmpty) {
-        setState(() {
-          artists = [];
-          isLoading = false;
-        });
-        return;
-      }
+      final favs = await favoriteService.getFavoritesForFestival(
+        widget.festivalId,
+      );
+      final favIds = favs.map((doc) => doc['artistId'] as String).toSet();
 
-      final String currentDate = widget.dates[currentDateIndex];
-      print('Fecha actual seleccionada: $currentDate');
-
-      // 2. Obtener artistas filtrados por ID, stage y date
-      // Recuerda que Firebase limita a 10 IDs en whereIn
-      final limitedIds = artistIds.take(10).toList();
-
-      print('IDs usados en consulta artists: $limitedIds');
-
-      final artistQuery = FirebaseFirestore.instance
-          .collection('artists')
-          .where(FieldPath.documentId, whereIn: limitedIds);
-
-      final artistDocs = await artistQuery.get();
-
-      print('Número de artistas recuperados: ${artistDocs.docs.length}');
-
-      final filteredArtists =
-          artistDocs.docs
-              .map((doc) {
-                final data = doc.data();
-                return Artist.fromJson({...data, 'id': doc.id});
-              })
-              .where(
-                (artist) =>
-                    artist.stage == widget.stageName &&
-                    artist.date == currentDate,
-              )
-              .toList();
-
-      print('Artistas filtrados por stage y fecha: ${filteredArtists.length}');
-
-      // ... ordenación igual que antes
-
-      // Obtener favoritos y setState igual que antes
-      // ...
+      setState(() {
+        artists = [...withTime, ...withoutTime];
+        favoriteArtistIds = favIds;
+        isLoading = false;
+      });
     } catch (e) {
       print('Error: $e');
       setState(() {
         isLoading = false;
-        //_errorMessage = e.toString();
       });
     }
   }
