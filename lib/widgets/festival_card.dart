@@ -7,7 +7,8 @@ class FestivalCard extends StatelessWidget {
   final String city;
   final String country;
   final String? imageUrl;
-  final VoidCallback? onTap; // <--- nuevo
+  final List<String> stageNames;
+  final VoidCallback? onTap;
 
   const FestivalCard({
     super.key,
@@ -17,7 +18,8 @@ class FestivalCard extends StatelessWidget {
     required this.city,
     required this.country,
     this.imageUrl,
-    this.onTap, // <--- nuevo
+    required this.stageNames,
+    this.onTap,
   });
 
   String get dateRange {

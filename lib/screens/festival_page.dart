@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/favorites_page.dart';
+import 'package:myapp/widgets/state_page.dart';
 import 'south_beach_page.dart';
 import 'heineken_stage_page.dart';
 import 'cutty_shark_page.dart';
@@ -10,11 +11,15 @@ import '../widgets/bottom_nav_bar.dart';
 class FestivalPage extends StatefulWidget {
   final String festivalId;
   final String festivalName;
+  final List<String> stageNames;
+  final List<String> dates;
 
   const FestivalPage({
     super.key,
     required this.festivalId,
     required this.festivalName,
+    required this.stageNames,
+    required this.dates,
   });
 
   @override
@@ -24,17 +29,41 @@ class FestivalPage extends StatefulWidget {
 class _FestivalPageState extends State<FestivalPage> {
   int _index = 0;
   bool _pressed = false;
+  late final List<Widget> _pages;
 
   // Posición inicial del FAB
   Offset fabPosition = const Offset(20, 500); // ajusta según pantalla y diseño
 
-  final List<Widget> _pages = const [
-    SouthBeachPage(),
-    HeinekenStagePage(),
-    CuttySharkPage(),
-    RepsolPage(),
-    RisingStarsPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    print('Festival ID: ${widget.festivalId}');
+    print('Festival Name: ${widget.festivalName}');
+    print('Stages: ${widget.stageNames}');
+    print('Dates: ${widget.dates}');
+
+    if (widget.festivalName.toLowerCase() == 'fib') {
+      _pages = const [
+        SouthBeachPage(),
+        HeinekenStagePage(),
+        CuttySharkPage(),
+        RepsolPage(),
+        RisingStarsPage(),
+      ];
+    } else {
+      _pages =
+          widget.stageNames
+              .map(
+                (name) => StagePage(
+                  stageName: name,
+                  dates: widget.dates,
+                  festivalId: widget.festivalId,
+                ),
+              )
+              .toList();
+    }
+  }
 
   void _onFavoritePressed() async {
     if (_pressed) return; // prevenir doble tap rápido
@@ -114,6 +143,16 @@ class _FestivalPageState extends State<FestivalPage> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
+        stageNames:
+            widget.stageNames.isNotEmpty
+                ? widget.stageNames
+                : [
+                  'South Beach',
+                  'Heineken',
+                  'Cutty Shark',
+                  'Repsol',
+                  'Rising Stars',
+                ],
       ),
     );
   }

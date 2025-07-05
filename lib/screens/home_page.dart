@@ -48,6 +48,7 @@ class HomePage extends StatelessWidget {
                 dates: List<String>.from(data['date'] ?? []),
                 city: (data['ciudad'] ?? '').toString(),
                 country: (data['pais'] ?? '').toString(),
+                stageNames: List<String>.from(data['stages'] ?? []),
                 imageUrl: data['imageUrl'],
                 onTap: () {
                   Navigator.push(
@@ -60,7 +61,9 @@ class HomePage extends StatelessWidget {
                                     .id, // o data['id'] si lo tienes en el documento
                             festivalName:
                                 (data['name'] ?? '')
-                                    .toString(), // Le pasas toda la info o solo lo que necesites
+                                    .toString(),
+                            stageNames: List<String>.from(data['stages']), // asegúrate de que es una lista de strings
+                            dates: List<String>.from(data['date']), // Le pasas toda la info o solo lo que necesites
                           ),
                     ),
                   );
