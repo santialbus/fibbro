@@ -29,44 +29,14 @@ class FestivalPage extends StatefulWidget {
 class _FestivalPageState extends State<FestivalPage> {
   int _index = 0;
   bool _pressed = false;
-  late final List<Widget> _pages;
 
   // Posición inicial del FAB
-  Offset fabPosition = const Offset(20, 500); // ajusta según pantalla y diseño
+  Offset fabPosition = const Offset(20, 500);
 
-  @override
-  void initState() {
-    super.initState();
-
-    print('Festival ID: ${widget.festivalId}');
-    print('Festival Name: ${widget.festivalName}');
-    print('Stages: ${widget.stageNames}');
-    print('Dates: ${widget.dates}');
-
-    if (widget.festivalName.toLowerCase() == 'fib') {
-      _pages = const [
-        SouthBeachPage(),
-        HeinekenStagePage(),
-        CuttySharkPage(),
-        RepsolPage(),
-        RisingStarsPage(),
-      ];
-    } else {
-      _pages =
-          widget.stageNames
-              .map(
-                (name) => StagePage(
-                  stageName: name,
-                  dates: widget.dates,
-                  festivalId: widget.festivalId,
-                ),
-              )
-              .toList();
-    }
-  }
+  bool get isFib => widget.festivalName.toLowerCase() == 'fib';
 
   void _onFavoritePressed() async {
-    if (_pressed) return; // prevenir doble tap rápido
+    if (_pressed) return;
     setState(() => _pressed = true);
     await Future.delayed(const Duration(milliseconds: 150));
     setState(() => _pressed = false);
@@ -78,18 +48,33 @@ class _FestivalPageState extends State<FestivalPage> {
     );
   }
 
+  List<Widget> _fibPages() => const [
+    SouthBeachPage(),
+    HeinekenStagePage(),
+    CuttySharkPage(),
+    RepsolPage(),
+    RisingStarsPage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    // Para limitar el movimiento dentro de la pantalla:
     final screenSize = MediaQuery.of(context).size;
-    final fabSize = 72.0; // tamaño del FAB para el cálculo del límite
+    final fabSize = 72.0;
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.festivalName), centerTitle: true),
       body: Stack(
         children: [
-          _pages[_index],
-          // FAB draggable
+          isFib
+              ? _fibPages()[_index]
+              : StagePage(
+                key: ValueKey(
+                  widget.stageNames[_index],
+                ), // 🔥 esta línea es la clave
+                stageName: widget.stageNames[_index],
+                dates: widget.dates,
+                festivalId: widget.festivalId,
+              ),
           Positioned(
             left: fabPosition.dx,
             top: fabPosition.dy,
@@ -98,14 +83,11 @@ class _FestivalPageState extends State<FestivalPage> {
                 setState(() {
                   double newX = fabPosition.dx + details.delta.dx;
                   double newY = fabPosition.dy + details.delta.dy;
-
-                  // Limitar para que no salga de pantalla
                   newX = newX.clamp(0.0, screenSize.width - fabSize);
                   newY = newY.clamp(
                     0.0,
                     screenSize.height - fabSize - kToolbarHeight,
-                  ); // resta AppBar altura
-
+                  );
                   fabPosition = Offset(newX, newY);
                 });
               },
