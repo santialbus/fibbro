@@ -16,7 +16,7 @@
         "date": "2025-07-18",
         "time": "21:00",
         "genre": "Latino",
-        "stage": "Negrita Stage",
+        "stage": "Cutty Shark Stage",
         "duration": 60
     },
     {
@@ -36,7 +36,7 @@
         "date": "2025-07-18",
         "time": "23:00",
         "genre": "Reggaetón",
-        "stage": "Negrita Stage",
+        "stage": "Cutty Shark Stage",
         "duration": 60
     },
     {
@@ -54,7 +54,7 @@
         "id": "3741b3d6-4a8f-4fbc-b80c-1fcd0738bcf6",
         "name": "Omar Montes",
         "date": "2025-07-18",
-        "time": "01:00",
+        "time": "02:00",
         "genre": "Urbano",
         "stage": "Negrita Stage",
         "duration": 60
@@ -64,28 +64,29 @@
         "id": "71cd9c3c-3f88-43e9-8406-ea76ae3b47c1",
         "name": "Don Dale DJs",
         "date": "2025-07-18",
-        "time": "02:00",
+        "time": "04:00",
         "genre": "DJ Set",
         "stage": "Negrita Stage",
-        "duration": 120
+        "duration": 60
     },
+
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "ffcb2708-7bbf-4056-9612-4715531cdd58",
         "name": "DJ Nano",
         "date": "2025-07-18",
-        "time": "04:00",
+        "time": "05:00",
         "genre": "Electrónica",
         "stage": "Negrita Stage",
-        "duration": 120
+        "duration": 60
     },
     {
-    	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
-        "id": "c080693f-b3a0-4cf6-bb97-213a1511f0fd",
-        "name": "Warm Up",
+        "id_festival": "7ZALOSvVWAD0bVVE9ZNV",
+        "id": "b8ebf48b-ea5a-4b8a-9a3a-0e3e1600add",
+        "name": "Yan Block",
         "date": "2025-07-18",
-        "time": "19:00",
-        "genre": "DJ Set",
+        "time": "01:00",
+        "genre": "Trap",
         "stage": "Cutty Shark Stage",
         "duration": 60
     },
@@ -97,7 +98,7 @@
         "time": "03:00",
         "genre": "Pop / Trap Catalán",
         "stage": "Cutty Shark Stage",
-        "duration": 90
+        "duration": 69
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -157,7 +158,7 @@
         "time": "00:00",
         "genre": "Techno",
         "stage": "The dreams of Hathor",
-        "duration": 60
+        "duration": 50
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -167,7 +168,7 @@
         "time": "01:00",
         "genre": "Dance",
         "stage": "The dreams of Hathor",
-        "duration": 60
+        "duration": 50
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -217,14 +218,14 @@
         "time": "23:00",
         "genre": "Tech House",
         "stage": "Dragon Heart Stage",
-        "duration": 90
+        "duration": 60
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "6f259aa6-37ff-4340-b69e-6cdb2a7fda2c",
         "name": "Jayxme",
         "date": "2025-07-18",
-        "time": "00:30",
+        "time": "00:00",
         "genre": "EDM",
         "stage": "Dragon Heart Stage",
         "duration": 60
@@ -234,10 +235,10 @@
         "id": "10b1f270-b2c3-4cc6-9e44-0067f1f4d8db",
         "name": "Barce",
         "date": "2025-07-18",
-        "time": "01:30",
+        "time": "01:00",
         "genre": "Urban / House",
         "stage": "Dragon Heart Stage",
-        "duration": 30
+        "duration": 69
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -307,7 +308,7 @@
         "time": "23:30",
         "genre": "Urbano / Dance",
         "stage": "Rainbow Stage",
-        "duration": 120
+        "duration": 150
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -317,7 +318,7 @@
         "time": "01:30",
         "genre": "Urbano",
         "stage": "Rainbow Stage",
-        "duration": 60
+        "duration": 120
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -376,7 +377,7 @@
         "date": "2025-07-19",
         "time": "21:00",
         "genre": "Tecno-rumba",
-        "stage": "Negrita Stage",
+        "stage": "Cutty Shark Stage",
         "duration": 60
     },
     {
@@ -404,7 +405,7 @@
         "id": "a3731a1e-662c-47c5-b325-b1dff29a9a26",
         "name": "Justin Quiles",
         "date": "2025-07-19",
-        "time": "01:00",
+        "time": "02:00",
         "genre": "Reggaetón",
         "stage": "Negrita Stage",
         "duration": 60
@@ -412,7 +413,7 @@
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "f45e332b-1fd6-4909-8033-65f8b3ff7d3e",
-        "name": "Álvaro Ice",
+        "name": "Alvama Ice",
         "date": "2025-07-19",
         "time": "03:00",
         "genre": "DJ Set",
@@ -454,7 +455,7 @@
         "id": "c0d8c4b4-1a13-401e-bf91-3406ef7f9976",
         "name": "Paul Thin",
         "date": "2025-07-19",
-        "time": "00:00",
+        "time": "01:00",
         "genre": "Pop / Electro",
         "stage": "Cutty Shark Stage",
         "duration": 60
@@ -464,10 +465,10 @@
         "id": "76030df4-73c1-4dcb-8059-3dcf517e4b9c",
         "name": "Cali y El Dandee",
         "date": "2025-07-19",
-        "time": "01:00",
+        "time": "03:00",
         "genre": "Pop Latino",
         "stage": "Cutty Shark Stage",
-        "duration": 90
+        "duration": 60
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -497,7 +498,7 @@
         "time": "21:00",
         "genre": "R&B / Pop",
         "stage": "The dreams of Hathor",
-        "duration": 50
+        "duration": 60
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -532,7 +533,7 @@
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "eff00fc6-cf68-421e-bdb4-d1fc409ccf92",
-        "name": "Carlitos",
+        "name": "Carlittos",
         "date": "2025-07-19",
         "time": "01:00",
         "genre": "Urbano",
@@ -580,6 +581,16 @@
         "duration": 180
     },
     {
+        "id_festival": "7ZALOSvVWAD0bVVE9ZNV",
+        "id": "2a7f2db1-cb94-4b01-a382-8d87581ebcf9",
+        "name": "R.Flow",
+        "date": "2025-07-19",
+        "time": "23:00",
+        "genre": "Rap / Urbano",
+        "stage": "Dragon Heart Stage",
+        "duration": 50
+    },
+    {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "e6b52ac4-1940-42d5-8f02-2ef927eb1b85",
         "name": "Mike Farfardo",
@@ -587,14 +598,14 @@
         "time": "00:00",
         "genre": "Techno",
         "stage": "Dragon Heart Stage",
-        "duration": 120
+        "duration": 60
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "9ac1dd2e-63eb-4a2b-9627-80e535a3b242",
         "name": "Rajobos & Neval",
         "date": "2025-07-19",
-        "time": "02:00",
+        "time": "01:00",
         "genre": "Mashup / EDM",
         "stage": "Dragon Heart Stage",
         "duration": 60
@@ -604,7 +615,7 @@
         "id": "bf738055-79cf-45fa-98f3-95ebff73d00b",
         "name": "Juan Valiente",
         "date": "2025-07-19",
-        "time": "03:00",
+        "time": "02:00",
         "genre": "House / Tech House",
         "stage": "Dragon Heart Stage",
         "duration": 60
@@ -614,7 +625,7 @@
         "id": "1d22bd96-4f0f-4e53-b172-76cc28be5293",
         "name": "Don Dale DJs",
         "date": "2025-07-19",
-        "time": "04:00",
+        "time": "03:00",
         "genre": "DJ Set",
         "stage": "Dragon Heart Stage",
         "duration": 60
@@ -687,7 +698,7 @@
         "time": "02:00",
         "genre": "Trap",
         "stage": "Rainbow Stage",
-        "duration": 60
+        "duration": 120
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -707,7 +718,17 @@
         "time": "23:00",
         "genre": "Techno",
         "stage": "The Club",
-        "duration": 240
+        "duration": 120
+    },
+    {
+        "id_festival": "7ZALOSvVWAD0bVVE9ZNV",
+        "id": "ba3cfcb6-cac5-43oi-917d-1c5f264028b3",
+        "name": "Lucia Gea",
+        "date": "2025-07-19",
+        "time": "01:00",
+        "genre": "Techno",
+        "stage": "The Club",
+        "duration": 120
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -747,7 +768,7 @@
         "time": "21:30",
         "genre": "Rumba Rock",
         "stage": "Negrita Stage",
-        "duration": 60
+        "duration": 90
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
@@ -764,7 +785,7 @@
         "id": "0e1a7f1d-2165-4f49-8e06-6cb23d2911e2",
         "name": "Juan Magán",
         "date": "2025-07-20",
-        "time": "01:30",
+        "time": "02:30",
         "genre": "Electro Latino",
         "stage": "Negrita Stage",
         "duration": 60
@@ -774,7 +795,7 @@
         "id": "d96b1bdf-fcbd-447d-b59d-7c35c28b7e2d",
         "name": "Bresh",
         "date": "2025-07-20",
-        "time": "04:00",
+        "time": "04:30",
         "genre": "Fiesta / DJ Set",
         "stage": "Negrita Stage",
         "duration": 120
@@ -827,14 +848,14 @@
         "time": "19:00",
         "genre": "Pop",
         "stage": "The dreams of Hathor",
-        "duration": 50
+        "duration": 110
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "15c7f054-4b93-487b-b8a9-fb3b0f882b61",
         "name": "Asere",
         "date": "2025-07-20",
-        "time": "20:00",
+        "time": "21:00",
         "genre": "Electrónica / Latino",
         "stage": "The dreams of Hathor",
         "duration": 50
@@ -844,7 +865,7 @@
         "id": "cd19f1ec-63d4-4d7c-b1f7-6506f94c8b0e",
         "name": "Maggie",
         "date": "2025-07-20",
-        "time": "21:00",
+        "time": "22:00",
         "genre": "Pop",
         "stage": "The dreams of Hathor",
         "duration": 50
@@ -854,7 +875,7 @@
         "id": "e99d23e4-863f-4902-9844-fc5ac2c6f0b7",
         "name": "Mafalda Cardenal",
         "date": "2025-07-20",
-        "time": "22:00",
+        "time": "23:00",
         "genre": "Indie / Pop",
         "stage": "The dreams of Hathor",
         "duration": 50
@@ -864,17 +885,17 @@
         "id": "c2042c9c-7017-41e9-960e-2bd0899b1b2f",
         "name": "Juanjo García",
         "date": "2025-07-20",
-        "time": "23:00",
+        "time": "00:00",
         "genre": "Pop / Electrónica",
         "stage": "The dreams of Hathor",
-        "duration": 50
+        "duration": 60
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "9f16dc47-f81c-4c3e-bb1c-7f8a5938995d",
         "name": "J.Beren",
         "date": "2025-07-20",
-        "time": "00:00",
+        "time": "01:00",
         "genre": "Trap / Pop",
         "stage": "The dreams of Hathor",
         "duration": 60
@@ -884,8 +905,18 @@
         "id": "1f862f46-9b94-4a62-8fbb-05ae3d88d14e",
         "name": "Zaidbreak",
         "date": "2025-07-20",
-        "time": "01:00",
+        "time": "02:00",
         "genre": "Tech House / DJ Set",
+        "stage": "The dreams of Hathor",
+        "duration": 60
+    },
+    {
+        "id_festival": "7ZALOSvVWAD0bVVE9ZNV",
+        "id": "2d861bb2-3ire-4073-bf8e-764b5b5f0a3a",
+        "name": "Felinae",
+        "date": "2025-07-20",
+        "time": "03:00",
+        "genre": "Electrónica / Psicodélico",
         "stage": "The dreams of Hathor",
         "duration": 60
     },
@@ -1007,24 +1038,24 @@
         "time": "21:30",
         "genre": "Electrónica",
         "stage": "Rainbow Stage",
-        "duration": 120
+        "duration": 90
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "fefb6bfc-684e-4b62-bf5f-36b055c99b3d",
-        "name": "Llanes",
+        "name": "Lorena Llanes",
         "date": "2025-07-20",
         "time": "23:00",
         "genre": "Electrónica",
         "stage": "Rainbow Stage",
-        "duration": 60
+        "duration": 90
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "3e749b1a-91df-41e2-9764-034fd3a4e44a",
         "name": "Carlos Agraz",
         "date": "2025-07-20",
-        "time": "00:00",
+        "time": "00:30",
         "genre": "House / Tech House",
         "stage": "Rainbow Stage",
         "duration": 90
@@ -1034,50 +1065,30 @@
         "id": "c8b2169e-6c6c-4961-a598-0b9ab2481581",
         "name": "Viviana Casanova",
         "date": "2025-07-20",
-        "time": "01:30",
+        "time": "02:00",
         "genre": "Techno",
         "stage": "Rainbow Stage",
-        "duration": 60
+        "duration": 90
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "d60dc25c-1227-41f8-b85c-89c53cfedf8c",
         "name": "Pive",
         "date": "2025-07-20",
-        "time": "02:30",
+        "time": "03:30",
         "genre": "Techno",
         "stage": "Rainbow Stage",
-        "duration": 60
+        "duration": 90
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
         "id": "b31770c7-b02c-4037-bc20-14a2f6e01eae",
-        "name": "Rafa M",
+        "name": "Rafa M, Xavi Díaz y Micol & Gio",
         "date": "2025-07-20",
         "time": "19:00",
         "genre": "House / DJ Set",
         "stage": "The Club",
-        "duration": 60
-    },
-    {
-    	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
-        "id": "0cf75df3-f2c0-4f99-9605-43e256e52cd7",
-        "name": "Xavi Díaz",
-        "date": "2025-07-20",
-        "time": "20:00",
-        "genre": "Electrónica",
-        "stage": "The Club",
-        "duration": 60
-    },
-    {
-    	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
-        "id": "02c8671b-2fd0-4d8a-86cd-d18f944eb445",
-        "name": "Micol & Gio",
-        "date": "2025-07-20",
-        "time": "21:00",
-        "genre": "Electrónica",
-        "stage": "The Club",
-        "duration": 60
+        "duration": 540
     },
     {
     	"id_festival": "7ZALOSvVWAD0bVVE9ZNV",
