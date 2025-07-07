@@ -43,7 +43,11 @@ class _FestivalPageState extends State<FestivalPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => FavoritesPage(festivalId: widget.festivalId),
+        builder:
+            (_) => FavoritesPage(
+              festivalId: widget.festivalId,
+              dates: widget.dates,
+            ),
       ),
     );
   }
@@ -70,7 +74,7 @@ class _FestivalPageState extends State<FestivalPage> {
               : StagePage(
                 key: ValueKey(
                   widget.stageNames[_index],
-                ), // 🔥 esta línea es la clave
+                ),
                 stageName: widget.stageNames[_index],
                 dates: widget.dates,
                 festivalId: widget.festivalId,

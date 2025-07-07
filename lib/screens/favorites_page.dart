@@ -2,13 +2,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/artist.dart';
 import '../widgets/artist_favorite_card.dart';
 import '../services/favorite_service.dart';
 
 class FavoritesPage extends StatefulWidget {
-  const FavoritesPage({super.key, required String festivalId});
+  final String festivalId;
+  final List<String> dates;
+
+  const FavoritesPage({
+    super.key,
+    required this.festivalId,
+    required this.dates,
+  });
 
   @override
   State<FavoritesPage> createState() => _FavoritesPageState();
@@ -16,8 +24,9 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   final FavoriteService _favoriteService = FavoriteService();
-  final String _festivalId = '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
+  late final String _festivalId;
   late final String _userId;
+  late final List<String> _dates;
 
   List<Artist> favoriteArtists = [];
   bool isLoading = true;
@@ -28,6 +37,33 @@ class _FavoritesPageState extends State<FavoritesPage> {
     '2025-07-19',
   ];
   int _currentDateIndex = 0;
+
+  bool get isFib => _festivalId == '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
+
+  @override
+  void initState() {
+    super.initState();
+    _festivalId = widget.festivalId;
+    _userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    _dates = widget.dates;
+    loadFavorites();
+  }
+
+  // Normaliza la fecha a yyyy-MM-dd
+  String normalizeDate(String date) {
+    // Si formato dd/MM/yyyy o dd-MM-yyyy, lo invierte a yyyy-MM-dd
+    if (RegExp(r'^\d{2}[-/]\d{2}[-/]\d{4}$').hasMatch(date)) {
+      final parts = date.split(RegExp(r'[-/]'));
+      return '${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}';
+    }
+    // Reemplaza / por - si ya es yyyy/MM/dd o yyyy-MM-dd
+    return date.replaceAll('/', '-');
+  }
+
+  List<String> getDates() {
+    List<String> dates = isFib ? _availableDates : _dates;
+    return dates.map(normalizeDate).toList();
+  }
 
   Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
     Map<String, List<String>> solapamientos = {};
@@ -58,7 +94,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
         if (seSolapan) {
           solapamientos.putIfAbsent(a['id'], () => []);
           solapamientos.putIfAbsent(b['id'], () => []);
-
           solapamientos[a['id']]!.add(b['id']);
           solapamientos[b['id']]!.add(a['id']);
         }
@@ -68,15 +103,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return solapamientos;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    loadFavorites();
-  }
-
-  // Formateo manual de fecha sin intl
-  String formatFullDate(String isoDate) {
+  String formatFullDate(String rawDate) {
+    final isoDate = normalizeDate(rawDate);
     final date = DateTime.parse(isoDate);
 
     const days = [
@@ -110,45 +138,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return '$dayName, $day de $monthName';
   }
 
-  Set<String> detectarSolapamientos(List<Artist> artistas) {
-    Set<String> artistasConConflicto = {};
-
-    // Convertir start y end a minutos desde medianoche para comparación
-    int tiempoEnMinutos(String time) {
-      final parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      if (hour < 6) hour += 24;
-      return hour * 60 + minute;
-    }
-
-    // Obtener rango de cada artista: inicio y fin
-    List<Map<String, dynamic>> rangos =
-        artistas.map((artist) {
-          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
-          int duracion = artist.duration ?? 0;
-          int fin = inicio + duracion;
-          return {'id': artist.id, 'inicio': inicio, 'fin': fin};
-        }).toList();
-
-    // Comparar pares para solapamientos
-    for (int i = 0; i < rangos.length; i++) {
-      for (int j = i + 1; j < rangos.length; j++) {
-        final a = rangos[i];
-        final b = rangos[j];
-
-        bool seSolapan = (a['inicio'] < b['fin']) && (b['inicio'] < a['fin']);
-
-        if (seSolapan) {
-          artistasConConflicto.add(a['id']);
-          artistasConConflicto.add(b['id']);
-        }
-      }
-    }
-
-    return artistasConConflicto;
-  }
-
   Future<void> loadFavorites() async {
     if (_userId.isEmpty) {
       setState(() {
@@ -166,19 +155,34 @@ class _FavoritesPageState extends State<FavoritesPage> {
         festivalId: _festivalId,
       );
 
-      final jsonString = await rootBundle.loadString(
-        'assets/docs/artists.json',
-      );
+      List<Artist> allArtists = [];
 
-      final List<dynamic> jsonData = json.decode(jsonString);
-      final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
+      if (isFib) {
+        final jsonString = await rootBundle.loadString(
+          'assets/docs/artists.json',
+        );
+        final jsonData = json.decode(jsonString);
+        allArtists = (jsonData as List).map((e) => Artist.fromJson(e)).toList();
+      } else {
+        final batchedIds = favoriteIds.take(10).toList();
+
+        final querySnapshot =
+            await FirebaseFirestore.instance
+                .collection('artists')
+                .where(FieldPath.documentId, whereIn: batchedIds)
+                .get();
+
+        allArtists =
+            querySnapshot.docs
+                .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
+                .toList();
+      }
 
       final filtered =
           allArtists
               .where((artist) => favoriteIds.contains(artist.id))
               .toList();
 
-      // Ordenar por fecha y hora (hora nocturna de 17:00 a 6:00)
       filtered.sort((a, b) {
         final dateCompare = a.date.compareTo(b.date);
         if (dateCompare != 0) return dateCompare;
@@ -211,22 +215,18 @@ class _FavoritesPageState extends State<FavoritesPage> {
     setState(() {
       _currentDateIndex = newIndex;
     });
-    loadFavorites(); // Recarga al cambiar fecha para mantener sincronía
+    loadFavorites();
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentDate = _availableDates[_currentDateIndex];
+    final currentDate = getDates()[_currentDateIndex];
     final artistsOfDay =
-        favoriteArtists.where((artist) => artist.date == currentDate).toList();
-
+        favoriteArtists.where((a) => a.date == currentDate).toList();
     final solapadosMap = artistasSolapados(artistsOfDay);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis favoritos'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Mis favoritos'), centerTitle: true),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -259,7 +259,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         IconButton(
                           icon: const Icon(Icons.chevron_right),
                           onPressed:
-                              _currentDateIndex < _availableDates.length - 1
+                              _currentDateIndex < getDates().length - 1
                                   ? () => _changeDate(_currentDateIndex + 1)
                                   : null,
                         ),
