@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myapp/services/notification_service.dart';
 
 import '../models/artist.dart';
 import '../widgets/artist_favorite_card.dart';
@@ -140,6 +141,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Future<void> loadFavorites() async {
     if (_userId.isEmpty) {
+      print('Usuario no logueado, no hay favoritos');
       setState(() {
         favoriteArtists = [];
         isLoading = false;
@@ -154,6 +156,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
         userId: _userId,
         festivalId: _festivalId,
       );
+      print(
+        'Favoritos obtenidos para usuario $_userId y festival $_festivalId: $favoriteIds',
+      );
 
       List<Artist> allArtists = [];
 
@@ -163,8 +168,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
         );
         final jsonData = json.decode(jsonString);
         allArtists = (jsonData as List).map((e) => Artist.fromJson(e)).toList();
+        print('Artistas totales del JSON local: ${allArtists.length}');
       } else {
         final batchedIds = favoriteIds.take(10).toList();
+        print('Consultando artistas con IDs: $batchedIds');
 
         final querySnapshot =
             await FirebaseFirestore.instance
@@ -176,12 +183,20 @@ class _FavoritesPageState extends State<FavoritesPage> {
             querySnapshot.docs
                 .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
                 .toList();
+
+        print('Artistas obtenidos de Firebase: ${allArtists.length}');
       }
 
       final filtered =
           allArtists
               .where((artist) => favoriteIds.contains(artist.id))
               .toList();
+
+      print('Artistas filtrados por favoritos: ${filtered.length}');
+      print('IDs filtrados: ${filtered.map((a) => a.id).toList()}');
+      print(
+        'Fechas de artistas filtrados: ${filtered.map((a) => a.date).toList()}',
+      );
 
       filtered.sort((a, b) {
         final dateCompare = a.date.compareTo(b.date);
@@ -203,7 +218,19 @@ class _FavoritesPageState extends State<FavoritesPage> {
         favoriteArtists = filtered;
         isLoading = false;
       });
-    } catch (e) {
+
+      // Aquí programa las notificaciones con la lista ya cargada
+      final notificationService = NotificationService();
+      for (final artist in favoriteArtists) {
+        try {
+          await notificationService.scheduleIfNotExists(artist);
+        } catch (e) {
+          print("Error con ${artist.name}: $e");
+        }
+      }
+    } catch (e, st) {
+      print('Error en loadFavorites: $e');
+      print(st);
       setState(() {
         isLoading = false;
         favoriteArtists = [];
@@ -224,6 +251,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final artistsOfDay =
         favoriteArtists.where((a) => a.date == currentDate).toList();
     final solapadosMap = artistasSolapados(artistsOfDay);
+
+    print('Fecha actual: $currentDate');
+    print('Artistas favoritos total: ${favoriteArtists.length}');
+    print('Artistas favoritos para esta fecha: ${artistsOfDay.length}');
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mis favoritos'), centerTitle: true),
