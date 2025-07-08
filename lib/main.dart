@@ -1,17 +1,39 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/services/notification_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/auth_page.dart';
 import 'screens/home_page.dart';
-import 'firebase_options.dart'; // generado por Firebase CLI
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService().initialize();
+  await requestExactAlarmPermission(); // Pedimos permiso solo si Android >= 31
   runApp(const MyApp());
+}
+
+Future<void> requestExactAlarmPermission() async {
+  if (!Platform.isAndroid) return;
+
+  final status = await Permission.scheduleExactAlarm.status;
+
+  if (!status.isGranted) {
+    final result = await Permission.scheduleExactAlarm.request();
+    print('🔔 Permiso SCHEDULE_EXACT_ALARM concedido: ${result.isGranted}');
+
+    if (!result.isGranted) {
+      print('⚠️ Permiso denegado. Abriendo ajustes...');
+      await openAppSettings(); // Abre ajustes para que lo activen manualmente
+    }
+  } else {
+    print('✅ Permiso SCHEDULE_EXACT_ALARM ya estaba concedido');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +49,9 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
           if (snapshot.hasData) {
             return const HomePage();
