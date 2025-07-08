@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -12,6 +14,26 @@ class NotificationService {
     _init();
   }
 
+  Future<void> initialize() async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: android);
+    await _plugin.initialize(initSettings);
+    tz.initializeTimeZones();
+
+    if (Platform.isAndroid) {
+      final androidImpl =
+          _plugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
+
+      if (androidImpl != null) {
+        final granted = await androidImpl.requestNotificationsPermission();
+        print('🔔 Permiso de notificaciones concedido: $granted');
+      }
+    }
+  }
+
   Future<void> _init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: android);
@@ -23,12 +45,15 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     final notifiedIds = prefs.getStringList('notified_artist_ids') ?? [];
 
-    if (notifiedIds.contains(artist.id)) return;
+    print(
+      "⏰ ¿Ya estaba notificado? ${notifiedIds.contains(artist.id)} — Artista: ${artist.name}",
+    );
 
-    final artistDateTime = DateTime.parse('${artist.date} ${artist.time}');
-    final notificationTime = artistDateTime.subtract(Duration(minutes: 10));
+    // Esto lo quitamos temporalmente para forzar notificación:
+    // if (notifiedIds.contains(artist.id)) return;
 
-    if (notificationTime.isBefore(DateTime.now())) return;
+    // Para pruebas: notifica en 1 minuto
+    final notificationTime = DateTime.now().add(const Duration(minutes: 10));
 
     try {
       await _plugin.zonedSchedule(
@@ -49,11 +74,23 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.dateAndTime,
       );
-    } catch (e) {
-      print("Error al agendar notificación para ${artist.name}: $e");
-    }
 
-    notifiedIds.add(artist.id);
-    await prefs.setStringList('notified_artist_ids', notifiedIds);
+      print(
+        "✅ Notificación programada para ${artist.name} a las $notificationTime",
+      );
+
+      // Guardamos el ID del artista para no repetir
+      notifiedIds.add(artist.id);
+      await prefs.setStringList('notified_artist_ids', notifiedIds);
+
+      // Mostramos notificaciones pendientes
+      final pending = await _plugin.pendingNotificationRequests();
+      print("🔔 Notificaciones pendientes: ${pending.length}");
+      for (var n in pending) {
+        print("🔔 ${n.id}: ${n.title} - ${n.body}");
+      }
+    } catch (e) {
+      print("❌ Error al agendar notificación para ${artist.name}: $e");
+    }
   }
 }
