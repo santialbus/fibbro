@@ -24,11 +24,9 @@ class StageAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(stage),
-      centerTitle: true,
       automaticallyImplyLeading: false,
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(40),
+        preferredSize: const Size.fromHeight(20),
         child: Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Row(

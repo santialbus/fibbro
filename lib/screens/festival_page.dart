@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/state_page.dart';
-import 'south_beach_page.dart';
-import 'heineken_stage_page.dart';
-import 'cutty_shark_page.dart';
-import 'repsol_page.dart';
-import 'rising_stars_page.dart';
-import '../widgets/bottom_nav_bar.dart';
 import 'package:myapp/widgets/draggable_favorite_button.dart';
+import 'package:myapp/screens/south_beach_page.dart';
+import 'package:myapp/screens/heineken_stage_page.dart';
+import 'package:myapp/screens/cutty_shark_page.dart';
+import 'package:myapp/screens/repsol_page.dart';
+import 'package:myapp/screens/rising_stars_page.dart';
 
 class FestivalPage extends StatefulWidget {
   final String festivalId;
@@ -26,56 +25,68 @@ class FestivalPage extends StatefulWidget {
   State<FestivalPage> createState() => _FestivalPageState();
 }
 
-class _FestivalPageState extends State<FestivalPage> {
-  int _currentIndex = 0;
+class _FestivalPageState extends State<FestivalPage>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
 
   bool get isFib => widget.festivalName.toLowerCase() == 'fib';
 
-  // Páginas fijas para FIB
-  static const List<Widget> _fibPages = [
-    SouthBeachPage(),
-    HeinekenStagePage(),
-    CuttySharkPage(),
-    RepsolPage(),
-    RisingStarsPage(),
-  ];
-
-  Widget _buildStagePage() {
-    return StagePage(
-      key: ValueKey(widget.stageNames[_currentIndex]),
-      stageName: widget.stageNames[_currentIndex],
-      dates: widget.dates,
-      festivalId: widget.festivalId,
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: widget.stageNames.length,
+      vsync: this,
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  List<Widget> _buildPages() {
+    if (isFib) {
+      return const [
+        HeinekenStagePage(),
+        RepsolPage(),
+        RisingStarsPage(),
+        CuttySharkPage(),
+        SouthBeachPage(),
+      ];
+    } else {
+      return widget.stageNames.map((stage) {
+        return StagePage(
+          key: ValueKey(stage),
+          stageName: stage,
+          dates: widget.dates,
+          festivalId: widget.festivalId,
+        );
+      }).toList();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.festivalName), centerTitle: true),
+      appBar: AppBar(
+        title: Text(widget.festivalName),
+        centerTitle: true,
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabs: widget.stageNames.map((stage) => Tab(text: stage)).toList(),
+        ),
+      ),
       body: Stack(
         children: [
-          // Mostrar página según si es FIB o no
-          isFib ? _fibPages[_currentIndex] : _buildStagePage(),
+          TabBarView(controller: _tabController, children: _buildPages()),
           DraggableFavoriteButton(
             festivalId: widget.festivalId,
             dates: widget.dates,
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        stageNames:
-            widget.stageNames.isNotEmpty
-                ? widget.stageNames
-                : const [
-                  'South Beach',
-                  'Heineken',
-                  'Cutty Shark',
-                  'Repsol',
-                  'Rising Stars',
-                ],
       ),
     );
   }
