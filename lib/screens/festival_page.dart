@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/favorites_page.dart';
-import 'package:myapp/widgets/state_page.dart';
+import 'package:myapp/screens/state_page.dart';
 import 'south_beach_page.dart';
 import 'heineken_stage_page.dart';
 import 'cutty_shark_page.dart';
