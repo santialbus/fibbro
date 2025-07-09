@@ -27,19 +27,31 @@ class FestivalPage extends StatefulWidget {
 }
 
 class _FestivalPageState extends State<FestivalPage> {
-  int _index = 0;
-  bool _pressed = false;
+  int _currentIndex = 0;
+  bool _isFabPressed = false;
 
-  // Posición inicial del FAB
-  Offset fabPosition = const Offset(20, 500);
+  Offset _fabPosition = const Offset(20, 500);
+  static const double _fabSize = 72.0;
 
   bool get isFib => widget.festivalName.toLowerCase() == 'fib';
 
+  // Páginas fijas para FIB
+  static const List<Widget> _fibPages = [
+    SouthBeachPage(),
+    HeinekenStagePage(),
+    CuttySharkPage(),
+    RepsolPage(),
+    RisingStarsPage(),
+  ];
+
   void _onFavoritePressed() async {
-    if (_pressed) return;
-    setState(() => _pressed = true);
+    if (_isFabPressed) return;
+    setState(() => _isFabPressed = true);
+
     await Future.delayed(const Duration(milliseconds: 150));
-    setState(() => _pressed = false);
+
+    setState(() => _isFabPressed = false);
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -52,52 +64,48 @@ class _FestivalPageState extends State<FestivalPage> {
     );
   }
 
-  List<Widget> _fibPages() => const [
-    SouthBeachPage(),
-    HeinekenStagePage(),
-    CuttySharkPage(),
-    RepsolPage(),
-    RisingStarsPage(),
-  ];
+  Widget _buildStagePage() {
+    return StagePage(
+      key: ValueKey(widget.stageNames[_currentIndex]),
+      stageName: widget.stageNames[_currentIndex],
+      dates: widget.dates,
+      festivalId: widget.festivalId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final fabSize = 72.0;
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.festivalName), centerTitle: true),
       body: Stack(
         children: [
-          isFib
-              ? _fibPages()[_index]
-              : StagePage(
-                key: ValueKey(
-                  widget.stageNames[_index],
-                ),
-                stageName: widget.stageNames[_index],
-                dates: widget.dates,
-                festivalId: widget.festivalId,
-              ),
+          // Mostrar página según si es FIB o no
+          isFib ? _fibPages[_currentIndex] : _buildStagePage(),
+
+          // FAB flotante con drag
           Positioned(
-            left: fabPosition.dx,
-            top: fabPosition.dy,
+            left: _fabPosition.dx,
+            top: _fabPosition.dy,
             child: GestureDetector(
               onPanUpdate: (details) {
                 setState(() {
-                  double newX = fabPosition.dx + details.delta.dx;
-                  double newY = fabPosition.dy + details.delta.dy;
-                  newX = newX.clamp(0.0, screenSize.width - fabSize);
+                  double newX = _fabPosition.dx + details.delta.dx;
+                  double newY = _fabPosition.dy + details.delta.dy;
+
+                  // Limitar dentro de la pantalla
+                  newX = newX.clamp(0.0, screenSize.width - _fabSize);
                   newY = newY.clamp(
                     0.0,
-                    screenSize.height - fabSize - kToolbarHeight,
+                    screenSize.height - _fabSize - kToolbarHeight,
                   );
-                  fabPosition = Offset(newX, newY);
+                  _fabPosition = Offset(newX, newY);
                 });
               },
               onTap: _onFavoritePressed,
               child: AnimatedScale(
-                scale: _pressed ? 0.9 : 1.0,
+                scale: _isFabPressed ? 0.9 : 1.0,
                 duration: const Duration(milliseconds: 150),
                 child: Material(
                   color: Colors.transparent,
@@ -127,12 +135,12 @@ class _FestivalPageState extends State<FestivalPage> {
         ],
       ),
       bottomNavigationBar: BottomNavBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
         stageNames:
             widget.stageNames.isNotEmpty
                 ? widget.stageNames
-                : [
+                : const [
                   'South Beach',
                   'Heineken',
                   'Cutty Shark',
