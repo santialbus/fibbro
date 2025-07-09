@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/models/artist.dart';
+import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/services/notification_service.dart';
-import '../models/artist.dart';
-import '../widgets/artist_card.dart';
-import '../widgets/stage_app_bar.dart';
-import '../services/favorite_service.dart';
+import 'package:myapp/services/artist_service.dart';
+import 'package:myapp/widgets/artist_card.dart';
+import 'package:myapp/widgets/stage_app_bar.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
 
 class StagePage extends StatefulWidget {
@@ -24,95 +24,77 @@ class StagePage extends StatefulWidget {
 }
 
 class _StagePageState extends State<StagePage> {
-  List<Artist> artists = [];
-  Set<String> favoriteArtistIds = {};
-  bool isLoading = true;
-  int currentDateIndex = 0;
+  final FavoriteService _favoriteService = FavoriteService();
+  final NotificationService _notificationService = NotificationService();
 
-  final FavoriteService favoriteService = FavoriteService();
+  List<Artist> _artists = [];
+  Set<String> _favoriteIds = {};
+  bool _isLoading = true;
+  int _currentDateIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    loadArtists();
+    _fetchArtists();
   }
 
-  String convertDateFormat(String date) {
-    final parts = date.split('/');
-    if (parts.length == 3) {
-      final day = parts[0].padLeft(2, '0');
-      final month = parts[1].padLeft(2, '0');
-      final year = parts[2];
-      return '$year-$month-$day';
-    }
-    return date; // fallback si ya está bien
-  }
-
-  Future<void> loadArtists() async {
-    setState(() => isLoading = true);
+  Future<void> _fetchArtists() async {
+    setState(() => _isLoading = true);
 
     try {
-      final String currentDateRaw = widget.dates[currentDateIndex];
-      final String currentDate = convertDateFormat(currentDateRaw);
-      print('Cargando artistas para:');
-      print('Festival: ${widget.festivalId}');
-      print('Stage: ${widget.stageName}');
-      print('Date: $currentDate');
+      final currentDate = widget.dates[_currentDateIndex];
+      final artists = await ArtistService.getArtistsForStage(
+        festivalId: widget.festivalId,
+        stage: widget.stageName,
+        rawDate: currentDate,
+      );
 
-      // 🔥 Nueva consulta directa por campos
-      final querySnapshot =
-          await FirebaseFirestore.instance
-              .collection('artists')
-              .where('id_festival', isEqualTo: widget.festivalId.trim())
-              .where('stage', isEqualTo: widget.stageName)
-              .where('date', isEqualTo: currentDate)
-              .get();
-
-      print('Artistas encontrados: ${querySnapshot.docs.length}');
-
-      final List<Artist> allArtists =
-          querySnapshot.docs.map((doc) {
-            final data = doc.data();
-            return Artist.fromJson({...data, 'id': doc.id});
-          }).toList();
-
-      // Separar por time
-      final withTime = allArtists.where((a) => a.time != null).toList();
-      final withoutTime = allArtists.where((a) => a.time == null).toList();
-
-      withTime.sort((a, b) {
-        int parseTime(String time) {
-          final parts = time.split(':');
-          int hour = int.parse(parts[0]);
-          int minute = int.parse(parts[1]);
-          if (hour < 6) hour += 24;
-          return hour * 60 + minute;
-        }
-
-        return parseTime(a.time!) - parseTime(b.time!);
-      });
-
-      final favs = await favoriteService.getFavoritesForFestival(
+      final favs = await _favoriteService.getFavoritesForFestival(
         widget.festivalId,
       );
       final favIds = favs.map((doc) => doc['artistId'] as String).toSet();
 
       setState(() {
-        artists = [...withTime, ...withoutTime];
-        favoriteArtistIds = favIds;
-        isLoading = false;
+        _artists = artists;
+        _favoriteIds = favIds;
+        _isLoading = false;
       });
     } catch (e) {
-      print('Error: $e');
-      setState(() {
-        isLoading = false;
-      });
+      print('Error al cargar artistas: $e');
+      setState(() => _isLoading = false);
     }
   }
 
   void _changeDate(int newIndex) {
-    setState(() => currentDateIndex = newIndex);
-    loadArtists();
+    setState(() => _currentDateIndex = newIndex);
+    _fetchArtists();
+  }
+
+  Future<void> _handleFavoriteChange(Artist artist, bool isNowFav) async {
+    await _favoriteService.toggleFavorite(
+      festivalId: widget.festivalId,
+      artistId: artist.id,
+    );
+
+    if (isNowFav) {
+      await _notificationService.scheduleIfNotExists(artist);
+      SnackBarHelper.showStyledSnackBar(
+        context,
+        message: 'Añadido a favoritos: ${artist.name}',
+        isSuccess: true,
+      );
+      _favoriteIds.add(artist.id);
+    } else {
+      await _notificationService.cancelNotification(artist.id);
+      SnackBarHelper.showStyledSnackBar(
+        context,
+        message: 'Quitado de favoritos: ${artist.name}',
+        isSuccess: false,
+      );
+      _favoriteIds.remove(artist.id);
+    }
+
+    setState(() {});
   }
 
   @override
@@ -121,55 +103,25 @@ class _StagePageState extends State<StagePage> {
       appBar: StageAppBar(
         stage: widget.stageName,
         dates: widget.dates,
-        currentIndex: currentDateIndex,
+        currentIndex: _currentDateIndex,
         onDateChanged: _changeDate,
       ),
       body:
-          isLoading
+          _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : artists.isEmpty
+              : _artists.isEmpty
               ? const Center(child: Text('No hay artistas disponibles.'))
               : ListView.builder(
-                itemCount: artists.length,
+                itemCount: _artists.length,
                 itemBuilder: (context, index) {
-                  final artist = artists[index];
-                  final isFav = favoriteArtistIds.contains(artist.id);
+                  final artist = _artists[index];
+                  final isFav = _favoriteIds.contains(artist.id);
 
                   return ArtistCard(
                     artist: artist,
                     initiallyFavorite: isFav,
-                    onFavoriteChanged: (isNowFav) async {
-                      await favoriteService.toggleFavorite(
-                        festivalId: widget.festivalId,
-                        artistId: artist.id,
-                      );
-
-                      final notificationService = NotificationService();
-                      if (isNowFav) {
-                        await notificationService.scheduleIfNotExists(artist);
-                        SnackBarHelper.showStyledSnackBar(
-                          context,
-                          message: 'Añadido a favoritos: ${artist.name}',
-                          isSuccess: true,
-                        );
-                      } else {
-                        await notificationService.cancelNotification(artist.id);
-
-                        SnackBarHelper.showStyledSnackBar(
-                          context,
-                          message: 'Quitado de favoritos: ${artist.name}',
-                          isSuccess: false,
-                        );
-                      }
-
-                      setState(() {
-                        if (isNowFav) {
-                          favoriteArtistIds.add(artist.id);
-                        } else {
-                          favoriteArtistIds.remove(artist.id);
-                        }
-                      });
-                    },
+                    onFavoriteChanged:
+                        (val) => _handleFavoriteChange(artist, val),
                   );
                 },
               ),
