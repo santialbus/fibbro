@@ -1,11 +1,47 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
+import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/services/notification_service.dart';
-import 'package:myapp/widgets/festival_card.dart'; // Asegúrate de importar correctamente
+import 'package:myapp/widgets/festival_card.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final FestivalService _festivalService = FestivalService();
+  HomePage({super.key});
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
+    return _festivalService.getFestivalsStream();
+  }
+
+  Widget _buildFestivalCard(
+    BuildContext context,
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data()!;
+    return FestivalCard(
+      name: (data['name'] ?? '').toString(),
+      year: (data['year'] ?? '').toString(),
+      dates: List<String>.from(data['date'] ?? []),
+      city: (data['ciudad'] ?? '').toString(),
+      country: (data['pais'] ?? '').toString(),
+      stageNames: List<String>.from(data['stages'] ?? []),
+      imageUrl: data['imageUrl'],
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => FestivalPage(
+                  festivalId: doc.id,
+                  festivalName: (data['name'] ?? '').toString(),
+                  stageNames: List<String>.from(data['stages']),
+                  dates: List<String>.from(data['date']),
+                ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +52,13 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // De momento inoperativo
+              // TODO: Implement search functionality
             },
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('festivales').snapshots(),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _festivalsStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Error al cargar festivales'));
@@ -40,38 +76,8 @@ class HomePage extends StatelessWidget {
 
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
-              return FestivalCard(
-                name: (data['name'] ?? '').toString(),
-                year: (data['year'] ?? '').toString(),
-                dates: List<String>.from(data['date'] ?? []),
-                city: (data['ciudad'] ?? '').toString(),
-                country: (data['pais'] ?? '').toString(),
-                stageNames: List<String>.from(data['stages'] ?? []),
-                imageUrl: data['imageUrl'],
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => FestivalPage(
-                            festivalId:
-                                docs[index]
-                                    .id, // o data['id'] si lo tienes en el documento
-                            festivalName: (data['name'] ?? '').toString(),
-                            stageNames: List<String>.from(
-                              data['stages'],
-                            ), // asegúrate de que es una lista de strings
-                            dates: List<String>.from(
-                              data['date'],
-                            ), // Le pasas toda la info o solo lo que necesites
-                          ),
-                    ),
-                  );
-                },
-              );
-            },
+            itemBuilder:
+                (context, index) => _buildFestivalCard(context, docs[index]),
           );
         },
       ),
