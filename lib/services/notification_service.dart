@@ -26,8 +26,17 @@ class NotificationService {
               .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin
               >();
-
       if (androidImpl != null) {
+        // Crear canal obligatorio en Android 8+
+        await androidImpl.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'onstagee_channel',
+            'Recordatorios de artistas',
+            description: 'Canal para notificaciones de artistas favoritos',
+            importance: Importance.max,
+          ),
+        );
+
         final granted = await androidImpl.requestNotificationsPermission();
         print('🔔 Permiso de notificaciones concedido: $granted');
       }
@@ -54,20 +63,20 @@ class NotificationService {
   }
 
   Future<void> showImmediateNotification() async {
-  await _plugin.show(
-    9999,
-    '🚨 Notificación de prueba',
-    'Esto es una notificación lanzada inmediatamente',
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'onstagee_channel',
-        'Recordatorios de artistas',
-        importance: Importance.max,
-        priority: Priority.high,
+    await _plugin.show(
+      9999,
+      '🚨 Notificación de prueba',
+      'Esto es una notificación lanzada inmediatamente',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'onstagee_channel',
+          'Recordatorios de artistas',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> scheduleIfNotExists(Artist artist) async {
     final prefs = await SharedPreferences.getInstance();
@@ -77,14 +86,18 @@ class NotificationService {
       "⏰ ¿Ya estaba notificado? ${notifiedIds.contains(artist.id)} — Artista: ${artist.name}",
     );
 
-    // Esto lo quitamos temporalmente para forzar notificación:
-    // if (notifiedIds.contains(artist.id)) return;
+    if (notifiedIds.contains(artist.id)) return;
 
-    // Para pruebas: notifica en 1 minuto
+    final now = DateTime.now();
     final artistDateTime = DateTime.parse('${artist.date} ${artist.time}');
     final notificationTime = artistDateTime.subtract(
-      const Duration(seconds: 10),
+      const Duration(minutes: 10),
     );
+
+    if (notificationTime.isBefore(now)) {
+      print("⚠️ Notificación descartada (en el pasado): $notificationTime");
+      return;
+    }
 
     try {
       await _plugin.zonedSchedule(
@@ -110,11 +123,9 @@ class NotificationService {
         "✅ Notificación programada para ${artist.name} a las $notificationTime",
       );
 
-      // Guardamos el ID del artista para no repetir
       notifiedIds.add(artist.id);
       await prefs.setStringList('notified_artist_ids', notifiedIds);
 
-      // Mostramos notificaciones pendientes
       final pending = await _plugin.pendingNotificationRequests();
       print("🔔 Notificaciones pendientes: ${pending.length}");
       for (var n in pending) {
