@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/widgets/snackbar_helper.dart';
 
 import '../models/artist.dart';
 import '../widgets/artist_favorite_card.dart';
@@ -219,7 +220,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
         isLoading = false;
       });
 
-      // Aquí programa las notificaciones con la lista ya cargada
       final notificationService = NotificationService();
       for (final artist in favoriteArtists) {
         try {
@@ -322,6 +322,17 @@ class _FavoritesPageState extends State<FavoritesPage> {
                               artistId: artist.id,
                               festivalId: _festivalId,
                             );
+                            if (!isFav) {
+                              final notificationService = NotificationService();
+                              await notificationService.cancelNotification(
+                                artist.id,
+                              );
+                              SnackBarHelper.showStyledSnackBar(
+                                context,
+                                message: 'Quitado de favoritos: ${artist.name}',
+                                isSuccess: false,
+                              );
+                            }
                             loadFavorites();
                           },
                         );

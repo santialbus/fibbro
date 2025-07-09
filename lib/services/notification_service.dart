@@ -41,6 +41,34 @@ class NotificationService {
     tz.initializeTimeZones();
   }
 
+  Future<void> cancelNotification(String artistId) async {
+    await _plugin.cancel(artistId.hashCode);
+
+    final prefs = await SharedPreferences.getInstance();
+    final notifiedIds = prefs.getStringList('notified_artist_ids') ?? [];
+
+    notifiedIds.remove(artistId);
+    await prefs.setStringList('notified_artist_ids', notifiedIds);
+
+    print("🗑️ Notificación cancelada para $artistId");
+  }
+
+  Future<void> showImmediateNotification() async {
+  await _plugin.show(
+    9999,
+    '🚨 Notificación de prueba',
+    'Esto es una notificación lanzada inmediatamente',
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'onstagee_channel',
+        'Recordatorios de artistas',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+    ),
+  );
+}
+
   Future<void> scheduleIfNotExists(Artist artist) async {
     final prefs = await SharedPreferences.getInstance();
     final notifiedIds = prefs.getStringList('notified_artist_ids') ?? [];
@@ -53,7 +81,10 @@ class NotificationService {
     // if (notifiedIds.contains(artist.id)) return;
 
     // Para pruebas: notifica en 1 minuto
-    final notificationTime = DateTime.now().add(const Duration(minutes: 10));
+    final artistDateTime = DateTime.parse('${artist.date} ${artist.time}');
+    final notificationTime = artistDateTime.subtract(
+      const Duration(seconds: 10),
+    );
 
     try {
       await _plugin.zonedSchedule(

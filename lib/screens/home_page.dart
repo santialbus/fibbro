@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
+import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/widgets/festival_card.dart'; // Asegúrate de importar correctamente
 
 class HomePage extends StatelessWidget {
@@ -41,7 +42,6 @@ class HomePage extends StatelessWidget {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final data = docs[index].data() as Map<String, dynamic>;
-
               return FestivalCard(
                 name: (data['name'] ?? '').toString(),
                 year: (data['year'] ?? '').toString(),
@@ -59,11 +59,13 @@ class HomePage extends StatelessWidget {
                             festivalId:
                                 docs[index]
                                     .id, // o data['id'] si lo tienes en el documento
-                            festivalName:
-                                (data['name'] ?? '')
-                                    .toString(),
-                            stageNames: List<String>.from(data['stages']), // asegúrate de que es una lista de strings
-                            dates: List<String>.from(data['date']), // Le pasas toda la info o solo lo que necesites
+                            festivalName: (data['name'] ?? '').toString(),
+                            stageNames: List<String>.from(
+                              data['stages'],
+                            ), // asegúrate de que es una lista de strings
+                            dates: List<String>.from(
+                              data['date'],
+                            ), // Le pasas toda la info o solo lo que necesites
                           ),
                     ),
                   );
@@ -72,6 +74,13 @@ class HomePage extends StatelessWidget {
             },
           );
         },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await NotificationService().showImmediateNotification();
+        },
+        child: const Icon(Icons.notifications),
       ),
     );
   }

@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/services/notification_service.dart';
 import '../models/artist.dart';
 import '../widgets/artist_card.dart';
 import '../widgets/stage_app_bar.dart';
 import '../services/favorite_service.dart';
+import 'package:myapp/widgets/snackbar_helper.dart';
 
 class StagePage extends StatefulWidget {
   final String festivalId;
@@ -36,22 +38,23 @@ class _StagePageState extends State<StagePage> {
   }
 
   String convertDateFormat(String date) {
-  final parts = date.split('/');
-  if (parts.length == 3) {
-    final day = parts[0].padLeft(2, '0');
-    final month = parts[1].padLeft(2, '0');
-    final year = parts[2];
-    return '$year-$month-$day';
+    final parts = date.split('/');
+    if (parts.length == 3) {
+      final day = parts[0].padLeft(2, '0');
+      final month = parts[1].padLeft(2, '0');
+      final year = parts[2];
+      return '$year-$month-$day';
+    }
+    return date; // fallback si ya está bien
   }
-  return date; // fallback si ya está bien
-}
 
   Future<void> loadArtists() async {
     setState(() => isLoading = true);
 
     try {
       final String currentDateRaw = widget.dates[currentDateIndex];
-      final String currentDate = convertDateFormat(currentDateRaw);      print('Cargando artistas para:');
+      final String currentDate = convertDateFormat(currentDateRaw);
+      print('Cargando artistas para:');
       print('Festival: ${widget.festivalId}');
       print('Stage: ${widget.stageName}');
       print('Date: $currentDate');
@@ -140,6 +143,24 @@ class _StagePageState extends State<StagePage> {
                         festivalId: widget.festivalId,
                         artistId: artist.id,
                       );
+
+                      final notificationService = NotificationService();
+                      if (isNowFav) {
+                        await notificationService.scheduleIfNotExists(artist);
+                        SnackBarHelper.showStyledSnackBar(
+                          context,
+                          message: 'Añadido a favoritos: ${artist.name}',
+                          isSuccess: true,
+                        );
+                      } else {
+                        await notificationService.cancelNotification(artist.id);
+
+                        SnackBarHelper.showStyledSnackBar(
+                          context,
+                          message: 'Quitado de favoritos: ${artist.name}',
+                          isSuccess: false,
+                        );
+                      }
 
                       setState(() {
                         if (isNowFav) {
