@@ -3,14 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/utils/notification_helper.dart';
 import 'package:myapp/widgets/festival_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final FestivalService _festivalService = FestivalService();
-  HomePage({super.key});
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
     return _festivalService.getFestivalsStream();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Chequeo de estado de notificaciones (Android 11+)
+    Future.delayed(Duration.zero, () {
+      NotificationHelper.checkNotificationStatus(context);
+    });
   }
 
   Widget _buildFestivalCard(
