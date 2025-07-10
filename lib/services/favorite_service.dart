@@ -173,4 +173,18 @@ class FavoriteService {
 
     return result;
   }
+
+  // En FavoriteService
+
+  Future<List<Map<String, dynamic>>> getFavoritesForUserRaw(
+    String userId,
+  ) async {
+    final favSnapshot =
+        await _firestore
+            .collection('favorites')
+            .where('userId', isEqualTo: userId)
+            .get();
+
+    return favSnapshot.docs.map((doc) => doc.data()).toList();
+  }
 }

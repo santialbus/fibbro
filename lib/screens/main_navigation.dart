@@ -1,9 +1,9 @@
 // lib/screens/main_navigation.dart
 
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/all_favorites_page.dart';
 import 'package:myapp/screens/profile_page.dart';
 import 'home_page.dart';
-import 'favorites_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -15,11 +15,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    HomePage(),
-    FavoritesPage(festivalId: '', dates: []), // Te explico esto abajo
-    ProfilePage(),
-  ];
+  final List<Widget> _screens = [HomePage(), AllFavoritesPage(), ProfilePage()];
 
   void _onTabTapped(int index) {
     setState(() => _currentIndex = index);
