@@ -78,7 +78,7 @@ class NotificationService {
     );
   }
 
-  Future<void> scheduleIfNotExists(Artist artist) async {
+  Future<bool> scheduleIfNotExists(Artist artist) async {
     final prefs = await SharedPreferences.getInstance();
     final notifiedIds = prefs.getStringList('notified_artist_ids') ?? [];
 
@@ -86,7 +86,7 @@ class NotificationService {
       "⏰ ¿Ya estaba notificado? ${notifiedIds.contains(artist.id)} — Artista: ${artist.name}",
     );
 
-    if (notifiedIds.contains(artist.id)) return;
+    if (notifiedIds.contains(artist.id)) return false;
 
     final now = DateTime.now();
     final artistDateTime = DateTime.parse('${artist.date} ${artist.time}');
@@ -96,7 +96,7 @@ class NotificationService {
 
     if (notificationTime.isBefore(now)) {
       print("⚠️ Notificación descartada (en el pasado): $notificationTime");
-      return;
+      return false;
     }
 
     try {
@@ -131,8 +131,10 @@ class NotificationService {
       for (var n in pending) {
         print("🔔 ${n.id}: ${n.title} - ${n.body}");
       }
+      return true;
     } catch (e) {
       print("❌ Error al agendar notificación para ${artist.name}: $e");
+      return false;
     }
   }
 }

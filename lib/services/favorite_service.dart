@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:myapp/models/artist.dart';
+import 'package:myapp/models/favorite_artist_info.dart';
 
 class FavoriteService {
   final _firestore = FirebaseFirestore.instance;
@@ -87,18 +92,19 @@ class FavoriteService {
 
     return favQuery.docs;
   }
-  
-  Future<List<String>> getFavoriteArtistIdsForUser({
-  required String userId,
-  required String festivalId,
-}) async {
-  final favs = await _firestore
-      .collection('favorites')
-      .where('userId', isEqualTo: userId)
-      .where('festivalId', isEqualTo: festivalId)
-      .get();
 
-  return favs.docs.map((doc) => doc['artistId'] as String).toList();
-}
+  Future<List<String>> getFavoriteArtistIdsForUser({
+    required String userId,
+    required String festivalId,
+  }) async {
+    final favs =
+        await _firestore
+            .collection('favorites')
+            .where('userId', isEqualTo: userId)
+            .where('festivalId', isEqualTo: festivalId)
+            .get();
+
+    return favs.docs.map((doc) => doc['artistId'] as String).toList();
+  }
 
 }

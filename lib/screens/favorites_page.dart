@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
 
 import '../models/artist.dart';
@@ -221,9 +222,17 @@ class _FavoritesPageState extends State<FavoritesPage> {
       });
 
       final notificationService = NotificationService();
+      final storageService = NotificationStorageService();
+
       for (final artist in favoriteArtists) {
         try {
-          await notificationService.scheduleIfNotExists(artist);
+          final wasScheduled = await notificationService.scheduleIfNotExists(
+            artist,
+          );
+
+          if (wasScheduled) {
+            await storageService.addUnread(artist.id);
+          }
         } catch (e) {
           print("Error con ${artist.name}: $e");
         }

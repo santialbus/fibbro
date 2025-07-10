@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/notification_helper.dart';
 import 'package:myapp/widgets/festival_card.dart';
 
@@ -69,7 +70,53 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: Implement search functionality
+              // Implementar búsqueda
+            },
+          ),
+          FutureBuilder<int>(
+            future: NotificationStorageService().getUnreadCount(),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notifications').then((
+                        _,
+                      ) async {
+                        // Marcar como leídas al volver
+                        await NotificationStorageService().markAllAsRead();
+                      });
+                    },
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 20,
+                          minHeight: 20,
+                        ),
+                        child: Text(
+                          unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
           ),
         ],

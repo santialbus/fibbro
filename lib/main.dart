@@ -5,19 +5,20 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/screens/main_navigation.dart';
+import 'package:myapp/screens/notification_page.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/auth_page.dart';
-import 'screens/home_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService().initialize();
-  await requestExactAlarmPermission(); 
-  
+  await requestExactAlarmPermission();
+
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -54,6 +55,9 @@ class MyApp extends StatelessWidget {
       title: 'FIB Horarios',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
+      routes: {
+        '/notifications': (_) => const NotificationsPage(), 
+      },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -63,7 +67,7 @@ class MyApp extends StatelessWidget {
             );
           }
           if (snapshot.hasData) {
-            return HomePage();
+            return const MainNavigation();
           } else {
             return const AuthPage();
           }
