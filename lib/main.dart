@@ -39,7 +39,7 @@ Future<void> requestExactAlarmPermission() async {
 
     if (!result.isGranted) {
       print('⚠️ Permiso denegado. Abriendo ajustes...');
-      await openAppSettings(); // Abre ajustes para que lo activen manualmente
+      await openAppSettings(); 
     }
   } else {
     print('✅ Permiso SCHEDULE_EXACT_ALARM ya estaba concedido');
@@ -56,7 +56,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       routes: {
-        '/notifications': (_) => const NotificationsPage(), 
+        '/notifications': (context) {
+          final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+          return NotificationsPage(userId: userId);
+        },
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

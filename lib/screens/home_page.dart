@@ -85,8 +85,10 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pushNamed(context, '/notifications').then((
                         _,
                       ) async {
-                        // Marcar como leídas al volver
                         await NotificationStorageService().markAllAsRead();
+                        setState(
+                          () {},
+                        ); // Actualiza contador de notificaciones no leídas
                       });
                     },
                   ),

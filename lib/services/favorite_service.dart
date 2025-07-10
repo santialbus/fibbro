@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:myapp/models/artist.dart';
-import 'package:myapp/models/favorite_artist_info.dart';
 
 class FavoriteService {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  static const String fibFestivalId = '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
 
   Future<void> toggleFavorite({
     required String artistId,
@@ -107,4 +107,70 @@ class FavoriteService {
     return favs.docs.map((doc) => doc['artistId'] as String).toList();
   }
 
+  /// Obtiene todos los artistas favoritos con datos completos para un usuario
+  Future<List<Artist>> getFavoriteArtistsForUser(String userId) async {
+    // 1. Obtener todos los favoritos de este usuario (artistId + festivalId)
+    final favSnapshot =
+        await _firestore
+            .collection('favorites')
+            .where('userId', isEqualTo: userId)
+            .get();
+
+    if (favSnapshot.docs.isEmpty) return [];
+
+    // Map<festivalId, List<artistId>>
+    Map<String, List<String>> festivalToArtistIds = {};
+
+    for (var doc in favSnapshot.docs) {
+      final data = doc.data();
+      final festivalId = data['festivalId'] as String? ?? '';
+      final artistId = data['artistId'] as String? ?? '';
+      if (festivalId.isEmpty || artistId.isEmpty) continue;
+
+      festivalToArtistIds.putIfAbsent(festivalId, () => []);
+      festivalToArtistIds[festivalId]!.add(artistId);
+    }
+
+    List<Artist> result = [];
+
+    // 2. Por cada festival, cargar los artistas
+    for (final entry in festivalToArtistIds.entries) {
+      final festivalId = entry.key;
+      final artistIds = entry.value;
+
+      if (festivalId == fibFestivalId) {
+        // Carga desde JSON local para FIB
+        final jsonString = await rootBundle.loadString(
+          'assets/docs/artists.json',
+        );
+        final jsonData = json.decode(jsonString) as List;
+        final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
+
+        final fibArtists =
+            allArtists.where((a) => artistIds.contains(a.id)).toList();
+        result.addAll(fibArtists);
+      } else {
+        // Carga desde Firebase para otros festivales
+        // Aquí consultamos artistas donde el festivalId es igual y el id está en artistIds
+        final artistsQuery =
+            await _firestore
+                .collection('artists')
+                .where('id_festival', isEqualTo: festivalId)
+                .where(
+                  FieldPath.documentId,
+                  whereIn: artistIds.take(10).toList(),
+                ) // Por batch si quieres
+                .get();
+
+        final firebaseArtists =
+            artistsQuery.docs
+                .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
+                .toList();
+
+        result.addAll(firebaseArtists);
+      }
+    }
+
+    return result;
+  }
 }
