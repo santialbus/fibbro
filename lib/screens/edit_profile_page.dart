@@ -17,6 +17,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
+  // ignore: unused_field
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
 

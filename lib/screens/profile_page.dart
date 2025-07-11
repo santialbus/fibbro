@@ -22,6 +22,33 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadUserData();
   }
 
+  void _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cerrar sesión'),
+            content: const Text('¿Seguro que quieres cerrar sesión?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Cerrar sesión'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      await FirebaseAuth.instance.signOut();
+      // Aquí redirige al login o donde corresponda
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+
   Future<void> _loadUserData() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
@@ -186,6 +213,20 @@ class _ProfilePageState extends State<ProfilePage> {
                           .split(' ')
                           .first ??
                       '-',
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton.icon(
+                  onPressed: _signOut,
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Cerrar sesión'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 20,
+                    ),
+                  ),
                 ),
               ],
             ),
