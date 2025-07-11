@@ -8,7 +8,7 @@ import 'package:myapp/services/favorite_service.dart';
 import '../models/artist.dart';
 
 class AllFavoritesPage extends StatefulWidget {
-  const AllFavoritesPage({Key? key}) : super(key: key);
+  const AllFavoritesPage({super.key});
 
   @override
   State<AllFavoritesPage> createState() => _AllFavoritesPageState();
@@ -60,7 +60,10 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
 
       // Obtener nombre del festival (desde Firestore)
       final festDoc =
-          await FirebaseFirestore.instance.collection('festivals').doc(festivalId).get();
+          await FirebaseFirestore.instance
+              .collection('festivales')
+              .doc(festivalId)
+              .get();
 
       loadedFestivalNames[festivalId] = festDoc.data()?['name'] ?? 'Festival';
 
@@ -68,7 +71,9 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
       List<Artist> artists;
       if (festivalId == FavoriteService.fibFestivalId) {
         // Desde JSON local para FIB
-        final jsonString = await rootBundle.loadString('assets/docs/artists.json');
+        final jsonString = await rootBundle.loadString(
+          'assets/docs/artists.json',
+        );
         final jsonData = json.decode(jsonString) as List;
         final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
         artists = allArtists.where((a) => artistIds.contains(a.id)).toList();
@@ -83,15 +88,18 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
           );
           if (batchIds.isEmpty) continue;
 
-          final artistsQuery = await FirebaseFirestore.instance
-              .collection('artists')
-              .where('id_festival', isEqualTo: festivalId)
-              .where(FieldPath.documentId, whereIn: batchIds)
-              .get();
+          final artistsQuery =
+              await FirebaseFirestore.instance
+                  .collection('artists')
+                  .where('id_festival', isEqualTo: festivalId)
+                  .where(FieldPath.documentId, whereIn: batchIds)
+                  .get();
 
-          artists.addAll(artistsQuery.docs
-              .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
-              .toList());
+          artists.addAll(
+            artistsQuery.docs
+                .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
+                .toList(),
+          );
         }
       }
 
@@ -124,24 +132,30 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Mis favoritos')),
       body: ListView(
-        children: favoritesByFestival.entries.map((entry) {
-          final festivalId = entry.key;
-          final artists = entry.value;
-          final festivalName = festivalNames[festivalId] ?? 'Festival';
+        children:
+            favoritesByFestival.entries.map((entry) {
+              final festivalId = entry.key;
+              final artists = entry.value;
+              final festivalName = festivalNames[festivalId] ?? 'Festival';
 
-          return ExpansionTile(
-            title: Text(festivalName),
-            children: artists
-                .map((artist) => ListTile(
-                      title: Text(artist.name),
-                      subtitle: Text('${artist.stage} - ${artist.date} ${artist.time}'),
-                      onTap: () {
-                        // Aquí puedes navegar a detalles del artista o festival, si quieres
-                      },
-                    ))
-                .toList(),
-          );
-        }).toList(),
+              return ExpansionTile(
+                title: Text(festivalName),
+                children:
+                    artists
+                        .map(
+                          (artist) => ListTile(
+                            title: Text(artist.name),
+                            subtitle: Text(
+                              '${artist.stage} - ${artist.date} ${artist.time}',
+                            ),
+                            onTap: () {
+                              // Aquí puedes navegar a detalles del artista o festival, si quieres
+                            },
+                          ),
+                        )
+                        .toList(),
+              );
+            }).toList(),
       ),
     );
   }
