@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/screens/edit_profile_page.dart';
 import 'package:myapp/screens/main_navigation.dart';
 import 'package:myapp/screens/notification_page.dart';
 import 'package:myapp/services/notification_service.dart';
@@ -39,7 +40,7 @@ Future<void> requestExactAlarmPermission() async {
 
     if (!result.isGranted) {
       print('⚠️ Permiso denegado. Abriendo ajustes...');
-      await openAppSettings(); 
+      await openAppSettings();
     }
   } else {
     print('✅ Permiso SCHEDULE_EXACT_ALARM ya estaba concedido');
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
           final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
           return NotificationsPage(userId: userId);
         },
+        '/editProfile': (context) => const EditProfilePage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
