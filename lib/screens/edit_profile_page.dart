@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/user_service.dart';
@@ -13,6 +14,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
   bool _preferPushNotifs = true;
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  Map<String, dynamic>? _userData;
+  bool _isLoading = true;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -26,6 +32,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _favouriteArtistsController =
       TextEditingController();
   final TextEditingController _bioController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (!doc.exists) return;
+
+    final data = doc.data();
+    if (data == null) return;
+
+    setState(() {
+      _userData = data;
+      _firstNameController.text = data["firstName"] ?? '';
+      _lastNameController.text = data["lastName"] ?? '';
+      _cityController.text = data["city"] ?? '';
+      _countryController.text = data["country"] ?? '';
+      _birthdayController.text = data["birthday"] ?? '';
+      _genderController.text = data["gender"] ?? '';
+      _genresController.text =
+          (data["favoriteGenres"] as List?)?.join(', ') ?? '';
+      _attendedFestivalsController.text =
+          (data["attendedFestivals"] as List?)?.join(', ') ?? '';
+      _favouriteArtistsController.text =
+          (data["favoriteArtists"] as List?)?.join(', ') ?? '';
+      _bioController.text = data["bio"] ?? '';
+      _preferPushNotifs = data["preferPushNotifs"] ?? true;
+      _isLoading = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -45,6 +87,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Editar perfil')),
       body: Padding(
@@ -53,68 +98,77 @@ class _EditProfilePageState extends State<EditProfilePage> {
           key: _formKey,
           child: ListView(
             children: [
-              _buildTextField('Nombre', _firstNameController),
-              _buildTextField('Apellido', _lastNameController),
-              _buildTextField('Ciudad', _cityController),
-              _buildTextField('País', _countryController),
-              _buildTextField(
-                'Fecha de nacimiento (YYYY-MM-DD)',
-                _birthdayController,
+              _buildExpansionSection(
+                title: 'Información personal',
+                children: [
+                  _buildTextField('Nombre', _firstNameController),
+                  _buildTextField('Apellido', _lastNameController),
+                  _buildTextField(
+                    'Fecha de nacimiento (YYYY-MM-DD)',
+                    _birthdayController,
+                  ),
+                  _buildTextField(
+                    'Género (masculino, femenino, otro)',
+                    _genderController,
+                  ),
+                ],
               ),
-              _buildTextField(
-                'Género (masculino, femenino, otro)',
-                _genderController,
+              _buildExpansionSection(
+                title: 'Ubicación',
+                children: [
+                  _buildTextField('Ciudad', _cityController),
+                  _buildTextField('País', _countryController),
+                ],
               ),
-              _buildTextField(
-                'Géneros favoritos (coma separados)',
-                _genresController,
+              _buildExpansionSection(
+                title: 'Preferencias musicales',
+                children: [
+                  _buildTextField(
+                    'Géneros favoritos (coma separados)',
+                    _genresController,
+                  ),
+                  _buildTextField(
+                    'Artistas favoritos (coma separados)',
+                    _favouriteArtistsController,
+                  ),
+                ],
               ),
-              _buildTextField(
-                'Festivales asistidos (coma separados)',
-                _attendedFestivalsController,
+              _buildExpansionSection(
+                title: 'Festivales y bio',
+                children: [
+                  _buildTextField(
+                    'Festivales asistidos (coma separados)',
+                    _attendedFestivalsController,
+                  ),
+                  _buildTextField('Descripción', _bioController),
+                ],
               ),
-              _buildTextField(
-                'Artistas favoritos (coma separados)',
-                _favouriteArtistsController,
-              ),
-              _buildTextField('Descripción', _bioController),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Row(
                         children: [
-                          const Text('Perfil público'),
-                          const SizedBox(width: 8),
+                          Text('Perfil público'),
+                          SizedBox(width: 8),
                           Tooltip(
                             message:
                                 'Esta opción no se puede modificar actualmente.',
-                            child: const Icon(
-                              Icons.info_outline,
-                              color: Colors.grey,
-                            ),
+                            child: Icon(Icons.info_outline, color: Colors.grey),
                           ),
                         ],
                       ),
                     ),
-                    Switch(
-                      value: true,
-                      onChanged: null, // Deshabilitado
-                    ),
+                    Switch(value: true, onChanged: null),
                   ],
                 ),
               ),
               SwitchListTile(
                 title: const Text('Recibir notificaciones'),
                 value: _preferPushNotifs,
-                onChanged: (value) {
-                  setState(() {
-                    _preferPushNotifs = value;
-                  });
-                },
+                onChanged: (value) => setState(() => _preferPushNotifs = value),
               ),
-
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isSaving ? null : _saveProfile,
@@ -130,6 +184,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpansionSection({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: ExpansionTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        children: children,
       ),
     );
   }
@@ -191,16 +259,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
               .where((e) => e.isNotEmpty)
               .toList(),
       'bio': _bioController.text.trim(),
-      'preferences': {'notifications': _preferPushNotifs},
+      'preferPushNotifs': _preferPushNotifs,
     };
 
     try {
       await UserService().updateUserProfile(user.uid, dataToUpdate);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Perfil actualizado correctamente')),
+        const SnackBar(
+          content: Text('Perfil guardado correctamente ✅'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       print('Error al guardar: $e');
       ScaffoldMessenger.of(context).showSnackBar(
