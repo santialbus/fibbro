@@ -12,6 +12,7 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
+  bool _preferPushNotifs = true;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -20,8 +21,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _birthdayController = TextEditingController();
   final TextEditingController _genresController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
-  final TextEditingController _attendedFestivalsController = TextEditingController();
-  final TextEditingController _favouriteArtistsController = TextEditingController();
+  final TextEditingController _attendedFestivalsController =
+      TextEditingController();
+  final TextEditingController _favouriteArtistsController =
+      TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
 
   @override
   void dispose() {
@@ -34,15 +38,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _genderController.dispose();
     _attendedFestivalsController.dispose();
     _favouriteArtistsController.dispose();
+    _bioController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar perfil'),
-      ),
+      appBar: AppBar(title: const Text('Editar perfil')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -53,21 +57,75 @@ class _EditProfilePageState extends State<EditProfilePage> {
               _buildTextField('Apellido', _lastNameController),
               _buildTextField('Ciudad', _cityController),
               _buildTextField('País', _countryController),
-              _buildTextField('Fecha de nacimiento (YYYY-MM-DD)', _birthdayController),
-              _buildTextField('Género (masculino, femenino, otro)', _genderController),
-              _buildTextField('Géneros favoritos (coma separados)', _genresController),
-              _buildTextField('Festivales asistidos (coma separados)', _attendedFestivalsController),
-              _buildTextField('Artistas favoritos (coma separados)', _favouriteArtistsController),
+              _buildTextField(
+                'Fecha de nacimiento (YYYY-MM-DD)',
+                _birthdayController,
+              ),
+              _buildTextField(
+                'Género (masculino, femenino, otro)',
+                _genderController,
+              ),
+              _buildTextField(
+                'Géneros favoritos (coma separados)',
+                _genresController,
+              ),
+              _buildTextField(
+                'Festivales asistidos (coma separados)',
+                _attendedFestivalsController,
+              ),
+              _buildTextField(
+                'Artistas favoritos (coma separados)',
+                _favouriteArtistsController,
+              ),
+              _buildTextField('Descripción', _bioController),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Text('Perfil público'),
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message:
+                                'Esta opción no se puede modificar actualmente.',
+                            child: const Icon(
+                              Icons.info_outline,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: true,
+                      onChanged: null, // Deshabilitado
+                    ),
+                  ],
+                ),
+              ),
+              SwitchListTile(
+                title: const Text('Recibir notificaciones'),
+                value: _preferPushNotifs,
+                onChanged: (value) {
+                  setState(() {
+                    _preferPushNotifs = value;
+                  });
+                },
+              ),
+
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isSaving ? null : _saveProfile,
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Guardar'),
+                child:
+                    _isSaving
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text('Guardar'),
               ),
             ],
           ),
@@ -114,21 +172,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
       'country': country,
       'birthday': _birthdayController.text.trim(),
       'gender': _genderController.text.trim(),
-      'favoriteGenres': _genresController.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList(),
-      'attendedFestivals': _attendedFestivalsController.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList(),
-      'favoriteArtists': _favouriteArtistsController.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList(),
+      'favoriteGenres':
+          _genresController.text
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList(),
+      'attendedFestivals':
+          _attendedFestivalsController.text
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList(),
+      'favoriteArtists':
+          _favouriteArtistsController.text
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList(),
+      'bio': _bioController.text.trim(),
+      'preferences': {'notifications': _preferPushNotifs},
     };
 
     try {

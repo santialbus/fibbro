@@ -1,5 +1,3 @@
-// lib/screens/profile_page.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +36,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  String _getPartyLevel(int count) {
+    if (count >= 10) return 'Leyenda 🏆';
+    if (count >= 5) return 'Fiestero Medio 🎉';
+    if (count > 0) return 'Principiante 🕺';
+    return 'Sin historial 🙃';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -56,49 +61,191 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.pushNamed(context, '/editProfile');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/editProfile'),
           ),
         ],
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                const CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('assets/user_placeholder.png'),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '${_userData!["firstName"] ?? ''} ${_userData!["lastName"] ?? ''}',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _auth.currentUser?.email ?? '',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const Divider(height: 32),
+                _buildField(Icons.location_city, 'Ciudad', _userData!["city"]),
+                _buildField(Icons.public, 'País', _userData!["country"]),
+                _buildField(
+                  Icons.cake,
+                  'Fecha de nacimiento',
+                  _userData!["birthday"],
+                ),
+                _buildField(Icons.person, 'Género', _userData!["gender"]),
+                _buildField(
+                  Icons.music_note,
+                  'Géneros favoritos',
+                  (_userData!["favoriteGenres"] as List?)?.join(', ') ?? '',
+                ),
+                _buildField(
+                  Icons.festival,
+                  'Festivales asistidos',
+                  (_userData!["attendedFestivals"] as List?)?.join(', ') ?? '',
+                ),
+                _buildField(
+                  Icons.star,
+                  'Artistas favoritos',
+                  (_userData!["favoriteArtists"] as List?)?.join(', ') ?? '',
+                ),
+                _buildField(
+                  Icons.info_outline,
+                  'Descripción',
+                  _userData!["bio"] ?? '',
+                ),
+                _buildField(
+                  Icons.visibility,
+                  'Perfil público',
+                  (_userData!["isPublicProfile"] == true) ? 'Sí' : 'No',
+                ),
+                _buildField(
+                  Icons.notifications,
+                  'Notificaciones Push',
+                  (_userData!["preferences"]?["notifications"] == true)
+                      ? 'Sí'
+                      : 'No',
+                ),
+                _buildFieldWithNote(
+                  Icons.public,
+                  'Perfil público',
+                  (_userData!["isPublicProfile"] == true) ? 'Sí' : 'No',
+                  'Esta opción no se puede modificar por ahora',
+                ),
+                _buildField(
+                  Icons.celebration,
+                  'Nivel Fiestero 🥳',
+                  _getPartyLevel(
+                    (_userData?['attendedFestivals'] as List?)?.length ?? 0,
+                  ),
+                ),
+                _buildField(
+                  Icons.calendar_today,
+                  'Cuenta creada',
+                  (_userData!["createdAt"] as Timestamp?)
+                          ?.toDate()
+                          .toLocal()
+                          .toString()
+                          .split(' ')
+                          .first ??
+                      '-',
+                ),
+                _buildField(
+                  Icons.login,
+                  'Último acceso',
+                  _auth.currentUser?.metadata.lastSignInTime
+                          ?.toLocal()
+                          .toString()
+                          .split(' ')
+                          .first ??
+                      '-',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(IconData icon, String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildRow(
-            'Nombre',
-            '${_userData!["firstName"] ?? ''} ${_userData!["lastName"] ?? ''}',
-          ),
-          _buildRow('Email', _auth.currentUser?.email ?? ''),
-          _buildRow('Ciudad', _userData!["city"] ?? ''),
-          _buildRow('País', _userData!["country"] ?? ''),
-          _buildRow('Fecha de nacimiento', _userData!["birthday"] ?? ''),
-          _buildRow('Género', _userData!["gender"] ?? ''),
-          _buildRow(
-            'Géneros favoritos',
-            (_userData!["favoriteGenres"] as List?)?.join(', ') ?? '',
-          ),
-          _buildRow(
-            'Festivales asistidos',
-            (_userData!["attendedFestivals"] as List?)?.join(', ') ?? '',
-          ),
-          _buildRow(
-            'Artistas favoritos',
-            (_userData!["favoriteArtists"] as List?)?.join(', ') ?? '',
+          Icon(icon, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value != null && value.isNotEmpty ? value : '-',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRow(String label, String value) {
+  Widget _buildFieldWithNote(
+    IconData icon,
+    String label,
+    String? value,
+    String? note,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value.isNotEmpty ? value : '-')),
+          Icon(icon, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (note != null) ...[
+                      const SizedBox(width: 4),
+                      Tooltip(
+                        message: note,
+                        child: const Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value != null && value.isNotEmpty ? value : '-',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
