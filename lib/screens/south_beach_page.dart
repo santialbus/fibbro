@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/widgets/snackbar_helper.dart';
 import '../models/artist.dart';
 import '../widgets/artist_card.dart';
 import '../widgets/stage_app_bar.dart';
@@ -28,6 +30,7 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
 
   final FavoriteService favoriteService = FavoriteService();
   final String festivalId = '0e79d8ae-8c29-4f8e-a2bb-3a1eae9d2a77';
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
@@ -47,13 +50,16 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
       final List<dynamic> jsonData = json.decode(jsonString);
       final String currentDate = _availableDates[_currentDateIndex];
 
-      final List<Artist> withTime = jsonData
-          .map((json) => Artist.fromJson(json))
-          .where((artist) =>
-              artist.stage == 'South Beach' &&
-              artist.date == currentDate &&
-              artist.time != null)
-          .toList();
+      final List<Artist> withTime =
+          jsonData
+              .map((json) => Artist.fromJson(json))
+              .where(
+                (artist) =>
+                    artist.stage == 'South Beach' &&
+                    artist.date == currentDate &&
+                    artist.time != null,
+              )
+              .toList();
 
       withTime.sort((a, b) {
         int parseTime(String time) {
@@ -67,13 +73,16 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         return parseTime(a.time!) - parseTime(b.time!);
       });
 
-      final List<Artist> withoutTime = jsonData
-          .map((json) => Artist.fromJson(json))
-          .where((artist) =>
-              artist.stage == 'South Beach' &&
-              artist.date == currentDate &&
-              artist.time == null)
-          .toList();
+      final List<Artist> withoutTime =
+          jsonData
+              .map((json) => Artist.fromJson(json))
+              .where(
+                (artist) =>
+                    artist.stage == 'South Beach' &&
+                    artist.date == currentDate &&
+                    artist.time == null,
+              )
+              .toList();
 
       final List<Artist> all = [...withTime, ...withoutTime];
 
@@ -111,40 +120,57 @@ class _SouthBeachPageState extends State<SouthBeachPage> {
         currentIndex: _currentDateIndex,
         onDateChanged: _changeDate,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
               ? Center(child: Text(_errorMessage!))
               : artists.isEmpty
-                  ? const Center(
-                      child: Text('No hay artistas para South Beach Club'),
-                    )
-                  : ListView.builder(
-                      itemCount: artists.length,
-                      itemBuilder: (context, index) {
-                        final artist = artists[index];
-                        final isFav = favoriteArtistIds.contains(artist.id);
+              ? const Center(
+                child: Text('No hay artistas para South Beach Club'),
+              )
+              : ListView.builder(
+                itemCount: artists.length,
+                itemBuilder: (context, index) {
+                  final artist = artists[index];
+                  final isFav = favoriteArtistIds.contains(artist.id);
 
-                        return ArtistCard(
-                          artist: artist,
-                          initiallyFavorite: isFav,
-                          onFavoriteChanged: (isNowFav) async {
-                            await favoriteService.toggleFavorite(
-                              festivalId: festivalId,
-                              artistId: artist.id,
-                            );
+                  return ArtistCard(
+                    artist: artist,
+                    initiallyFavorite: isFav,
+                    onFavoriteChanged: (isNowFav) async {
+                      await favoriteService.toggleFavorite(
+                        festivalId: festivalId,
+                        artistId: artist.id,
+                      );
 
-                            setState(() {
-                              if (isNowFav) {
-                                favoriteArtistIds.add(artist.id);
-                              } else {
-                                favoriteArtistIds.remove(artist.id);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
+                      setState(() async {
+                        if (isNowFav) {
+                          await _notificationService.scheduleIfNotExists(
+                            artist,
+                          );
+                          SnackBarHelper.showStyledSnackBar(
+                            context,
+                            message: 'Añadido a favoritos: ${artist.name}',
+                            isSuccess: true,
+                          );
+                          favoriteArtistIds.add(artist.id);
+                        } else {
+                          await _notificationService.cancelNotification(
+                            artist.id,
+                          );
+                          SnackBarHelper.showStyledSnackBar(
+                            context,
+                            message: 'Quitado de favoritos: ${artist.name}',
+                            isSuccess: false,
+                          );
+                          favoriteArtistIds.remove(artist.id);
+                        }
+                      });
+                    },
+                  );
+                },
+              ),
     );
   }
 }
