@@ -20,6 +20,9 @@ class _HomePageState extends State<HomePage> {
 
   final Map<String, bool> _followingStatus = {};
 
+  bool _isSearching = false;
+  String _searchQuery = '';
+
   Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
     return _festivalService.getFestivalsStream();
   }
@@ -45,6 +48,17 @@ class _HomePageState extends State<HomePage> {
     await _followService.toggleFestivalFollow(festivalId);
     // Recarga estado luego del toggle
     await _loadFollowStatusForFestival(festivalId);
+  }
+
+  List<DocumentSnapshot<Map<String, dynamic>>> _filteredDocs(
+    List<DocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    if (_searchQuery.isEmpty) return docs;
+
+    return docs.where((doc) {
+      final name = (doc.data()?['name'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
   }
 
   Widget _buildFestivalCard(
@@ -95,12 +109,30 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('onStagee'),
+        title:
+            _isSearching
+                ? TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Buscar festivales...',
+                    border: InputBorder.none,
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                )
+                : const Text('onStagee'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
-              // Implementar búsqueda
+              setState(() {
+                _isSearching = !_isSearching;
+                _searchQuery = '';
+              });
             },
           ),
           FutureBuilder<int>(
@@ -162,7 +194,7 @@ class _HomePageState extends State<HomePage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final docs = snapshot.data?.docs ?? [];
+          final docs = _filteredDocs(snapshot.data?.docs ?? []);
 
           if (docs.isEmpty) {
             return const Center(child: Text('No hay festivales disponibles.'));

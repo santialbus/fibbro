@@ -18,13 +18,11 @@ class FestivalFollowService {
     final doc = await docRef.get();
 
     if (doc.exists) {
-      // Eliminar follow
       await docRef.delete();
       await _firestore.collection('festivales').doc(festivalId).update({
         'followersCount': FieldValue.increment(-1),
       });
     } else {
-      // Añadir follow
       await docRef.set({
         'uid': uid,
         'followedAt': FieldValue.serverTimestamp(),
