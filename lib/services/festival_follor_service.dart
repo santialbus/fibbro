@@ -10,7 +10,7 @@ class FestivalFollowService {
     if (uid == null) return;
 
     final docRef = _firestore
-        .collection('festivals')
+        .collection('festivales')
         .doc(festivalId)
         .collection('followers')
         .doc(uid);
@@ -20,7 +20,7 @@ class FestivalFollowService {
     if (doc.exists) {
       // Eliminar follow
       await docRef.delete();
-      await _firestore.collection('festivals').doc(festivalId).update({
+      await _firestore.collection('festivales').doc(festivalId).update({
         'followersCount': FieldValue.increment(-1),
       });
     } else {
@@ -29,7 +29,7 @@ class FestivalFollowService {
         'uid': uid,
         'followedAt': FieldValue.serverTimestamp(),
       });
-      await _firestore.collection('festivals').doc(festivalId).update({
+      await _firestore.collection('festivales').doc(festivalId).update({
         'followersCount': FieldValue.increment(1),
       });
     }
