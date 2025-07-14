@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:myapp/models/artist.dart';
 import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/services/notification_service.dart';
@@ -40,6 +41,9 @@ class _StagePageState extends State<StagePage> {
 
   Future<void> _fetchArtists() async {
     setState(() => _isLoading = true);
+    final box = Hive.box('festivalCache');
+    final cacheKey =
+        '${widget.festivalId}_${widget.stageName}_${widget.dates[_currentDateIndex]}';
 
     try {
       final currentDate = widget.dates[_currentDateIndex];
@@ -48,6 +52,9 @@ class _StagePageState extends State<StagePage> {
         stage: widget.stageName,
         rawDate: currentDate,
       );
+
+      // Guardar en caché como JSON string
+      box.put(cacheKey, Artist.listToJson(artists));
 
       final favs = await _favoriteService.getFavoritesForFestival(
         widget.festivalId,
@@ -60,8 +67,16 @@ class _StagePageState extends State<StagePage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error al cargar artistas: $e');
-      setState(() => _isLoading = false);
+      // Intentar cargar desde cache si falla
+      final cachedData = box.get(cacheKey);
+      if (cachedData != null) {
+        setState(() {
+          _artists = Artist.listFromJson(cachedData);
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

@@ -5,10 +5,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:myapp/screens/edit_profile_page.dart';
 import 'package:myapp/screens/main_navigation.dart';
 import 'package:myapp/screens/notification_page.dart';
 import 'package:myapp/services/notification_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/auth_page.dart';
@@ -26,6 +28,10 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+
+  final appDocDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocDir.path);
+  await Hive.openBox('festivalCache');
   runApp(const MyApp());
 }
 
@@ -36,14 +42,11 @@ Future<void> requestExactAlarmPermission() async {
 
   if (!status.isGranted) {
     final result = await Permission.scheduleExactAlarm.request();
-    print('🔔 Permiso SCHEDULE_EXACT_ALARM concedido: ${result.isGranted}');
 
     if (!result.isGranted) {
-      print('⚠️ Permiso denegado. Abriendo ajustes...');
       await openAppSettings();
     }
   } else {
-    print('✅ Permiso SCHEDULE_EXACT_ALARM ya estaba concedido');
   }
 }
 
@@ -62,6 +65,7 @@ class MyApp extends StatelessWidget {
           return NotificationsPage(userId: userId);
         },
         '/editProfile': (context) => const EditProfilePage(),
+        '/home': (context) => const MainNavigation(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

@@ -275,7 +275,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
       Navigator.pop(context, true);
     } catch (e) {
-      print('Error al guardar: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al guardar los datos')),
       );
