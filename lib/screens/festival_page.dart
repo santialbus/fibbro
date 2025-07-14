@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/festival_map_page.dart';
 import 'package:myapp/screens/state_page.dart';
 import 'package:myapp/widgets/draggable_favorite_button.dart';
 import 'package:myapp/screens/south_beach_page.dart';
@@ -67,16 +69,77 @@ class _FestivalPageState extends State<FestivalPage>
     }
   }
 
+  Future<bool> hasMapForFestival(String festivalId) async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('festivales')
+            .doc(festivalId)
+            .get();
+
+    return doc.exists &&
+        doc.data() != null &&
+        doc.data()!.containsKey('mapUrl') &&
+        (doc.data()!['mapUrl'] as String).isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.festivalName),
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: widget.stageNames.map((stage) => Tab(text: stage)).toList(),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: FutureBuilder<bool>(
+          future: hasMapForFestival(widget.festivalId),
+          builder: (context, snapshot) {
+            final hasMap = snapshot.data ?? false;
+
+            return AppBar(
+              title: Text(widget.festivalName),
+              centerTitle: true,
+              actions: [
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  )
+                else if (hasMap)
+                  IconButton(
+                    icon: const Icon(Icons.map_outlined),
+                    tooltip: 'Ver mapa del recinto',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => FestivalMapPage(
+                                festivalId: widget.festivalId,
+                              ),
+                        ),
+                      );
+                    },
+                  )
+                else
+                  const Tooltip(
+                    message: 'Mapa aún no disponible',
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(Icons.map_outlined, color: Colors.grey),
+                    ),
+                  ),
+              ],
+              bottom: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabs:
+                    widget.stageNames.map((stage) => Tab(text: stage)).toList(),
+              ),
+            );
+          },
         ),
       ),
       body: Stack(

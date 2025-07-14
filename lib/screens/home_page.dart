@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
 import 'package:myapp/services/festival_service.dart';
-import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/notification_helper.dart';
 import 'package:myapp/widgets/festival_card.dart';
@@ -44,6 +43,9 @@ class _HomePageState extends State<HomePage> {
       country: (data['pais'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
       imageUrl: data['imageUrl'],
+      followersCount: data['followersCount'], // 🔴 nuevo
+      genres: List<String>.from(data['genres'] ?? []), // 🔴 nuevo
+      hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty, // 🔴 nuevo
       onTap: () {
         Navigator.push(
           context,
@@ -146,13 +148,6 @@ class _HomePageState extends State<HomePage> {
                 (context, index) => _buildFestivalCard(context, docs[index]),
           );
         },
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await NotificationService().showImmediateNotification();
-        },
-        child: const Icon(Icons.notifications),
       ),
     );
   }
