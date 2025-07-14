@@ -12,6 +12,8 @@ class FestivalCard extends StatelessWidget {
   final int? followersCount;
   final List<String>? genres;
   final bool hasMap;
+  final bool isFollowing;
+  final VoidCallback onToggleFollow;
 
   const FestivalCard({
     super.key,
@@ -26,6 +28,8 @@ class FestivalCard extends StatelessWidget {
     required this.hasMap,
     this.followersCount,
     this.genres,
+    required this.isFollowing,
+    required this.onToggleFollow,
   });
 
   String get dateRange {
@@ -35,22 +39,12 @@ class FestivalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget =
-        (imageUrl != null && imageUrl!.isNotEmpty)
-            ? Image.network(imageUrl!, width: 80, height: 80, fit: BoxFit.cover)
-            : Image.asset(
-              'assets/images/default.png',
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            );
-
     return InkWell(
       onTap: onTap,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -58,7 +52,20 @@ class FestivalCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: imageWidget,
+                    child:
+                        (imageUrl != null && imageUrl!.isNotEmpty)
+                            ? Image.network(
+                              imageUrl!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            )
+                            : Image.asset(
+                              'assets/images/default.png',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -95,6 +102,15 @@ class FestivalCard extends StatelessWidget {
                           ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFollowing ? Icons.favorite : Icons.favorite_border,
+                      color: isFollowing ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: onToggleFollow,
+                    tooltip:
+                        isFollowing ? 'Dejar de seguir' : 'Seguir festival',
                   ),
                 ],
               ),
@@ -137,7 +153,10 @@ class FestivalCard extends StatelessWidget {
                         child: Chip(
                           label: Text(
                             '+${genres!.length - 3} más',
-                            style: const TextStyle(fontSize: 12, color: Colors.black),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
                           ),
                           backgroundColor: Colors.grey.shade300,
                         ),

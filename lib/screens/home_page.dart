@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_page.dart';
+import 'package:myapp/services/festival_follor_service.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/notification_helper.dart';
@@ -15,6 +16,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FestivalService _festivalService = FestivalService();
+  final FestivalFollowService _followService = FestivalFollowService();
+
+  final Map<String, bool> _followingStatus = {};
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
     return _festivalService.getFestivalsStream();
@@ -30,11 +34,33 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _loadFollowStatusForFestival(String festivalId) async {
+    final isFollowing = await _followService.isFollowing(festivalId);
+    setState(() {
+      _followingStatus[festivalId] = isFollowing;
+    });
+  }
+
+  Future<void> _toggleFollow(String festivalId) async {
+    await _followService.toggleFestivalFollow(festivalId);
+    // Recarga estado luego del toggle
+    await _loadFollowStatusForFestival(festivalId);
+  }
+
   Widget _buildFestivalCard(
     BuildContext context,
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data()!;
+    final festivalId = doc.id;
+
+    // Si no tenemos estado de seguimiento, lo cargamos
+    if (!_followingStatus.containsKey(festivalId)) {
+      _loadFollowStatusForFestival(festivalId);
+      // Mientras carga, asumimos false
+      _followingStatus[festivalId] = false;
+    }
+
     return FestivalCard(
       name: (data['name'] ?? '').toString(),
       year: (data['year'] ?? '').toString(),
@@ -43,16 +69,18 @@ class _HomePageState extends State<HomePage> {
       country: (data['pais'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
       imageUrl: data['imageUrl'],
-      followersCount: data['followersCount'], // 🔴 nuevo
-      genres: List<String>.from(data['genres'] ?? []), // 🔴 nuevo
-      hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty, // 🔴 nuevo
+      followersCount: data['followersCount'],
+      genres: List<String>.from(data['genres'] ?? []),
+      hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty,
+      isFollowing: _followingStatus[festivalId] ?? false,
+      onToggleFollow: () => _toggleFollow(festivalId),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder:
                 (context) => FestivalPage(
-                  festivalId: doc.id,
+                  festivalId: festivalId,
                   festivalName: (data['name'] ?? '').toString(),
                   stageNames: List<String>.from(data['stages']),
                   dates: List<String>.from(data['date']),
@@ -88,9 +116,7 @@ class _HomePageState extends State<HomePage> {
                         _,
                       ) async {
                         await NotificationStorageService().markAllAsRead();
-                        setState(
-                          () {},
-                        ); // Actualiza contador de notificaciones no leídas
+                        setState(() {});
                       });
                     },
                   ),
