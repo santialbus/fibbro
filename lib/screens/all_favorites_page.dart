@@ -39,10 +39,8 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
       return;
     }
 
-    // 1. Traer todos los favoritos completos (con festivalId y artistId)
     final allFavorites = await _favoriteService.getFavoritesForUserRaw(userId);
 
-    // 2. Agrupar por festivalId -> lista de artistIds
     Map<String, List<String>> idsByFestival = {};
     for (final fav in allFavorites) {
       final festId = fav['festivalId'] as String;
@@ -53,12 +51,10 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     Map<String, List<Artist>> loadedFavorites = {};
     Map<String, String> loadedFestivalNames = {};
 
-    // 3. Por cada festival, cargar artistas y nombre
     for (final entry in idsByFestival.entries) {
       final festivalId = entry.key;
       final artistIds = entry.value;
 
-      // Obtener nombre del festival (desde Firestore)
       final festDoc =
           await FirebaseFirestore.instance
               .collection('festivales')
@@ -113,6 +109,27 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     });
   }
 
+  DateTime parseFestivalDateTime(String date, String time) {
+    // Ejemplo: date = '2025-07-15', time = '01:30'
+    final dateParts = date.split('-').map(int.parse).toList();
+    final timeParts = time.split(':').map(int.parse).toList();
+
+    final dateTime = DateTime(
+      dateParts[0],
+      dateParts[1],
+      dateParts[2],
+      timeParts[0],
+      timeParts[1],
+    );
+
+    // Si es antes de las 6:00, pertenece al "día anterior" desde las 17:00
+    if (dateTime.hour < 6) {
+      return dateTime.subtract(const Duration(days: 1));
+    }
+
+    return dateTime;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -131,31 +148,180 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mis favoritos')),
-      body: ListView(
-        children:
-            favoritesByFestival.entries.map((entry) {
-              final festivalId = entry.key;
-              final artists = entry.value;
-              final festivalName = festivalNames[festivalId] ?? 'Festival';
+      body: RefreshIndicator(
+        onRefresh: loadFavoritesGrouped,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          children:
+              favoritesByFestival.entries.map((entry) {
+                final festivalId = entry.key;
+                final artists = entry.value;
+                final festivalName = festivalNames[festivalId] ?? 'Festival';
 
-              return ExpansionTile(
-                title: Text(festivalName),
-                children:
-                    artists
-                        .map(
-                          (artist) => ListTile(
-                            title: Text(artist.name),
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    title: Text(
+                      '$festivalName (${artists.length})',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                    children: [
+                      ListView.separated(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: artists.length,
+                        separatorBuilder:
+                            (_, __) => const Divider(indent: 72, height: 1),
+                        itemBuilder: (context, index) {
+                          final artist = artists[index];
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            leading:
+                                artist.imageUrl != null &&
+                                        artist.imageUrl!.isNotEmpty
+                                    ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: Image.network(
+                                        artist.imageUrl!,
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                    : CircleAvatar(
+                                      radius: 24,
+                                      backgroundColor: Colors.grey.shade300,
+                                      child: const Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            title: Text(
+                              artist.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             subtitle: Text(
-                              '${artist.stage} - ${artist.date} ${artist.time}',
+                              '${artist.stage} • ${artist.date} ${artist.time}',
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.favorite,
+                                color: Colors.red,
+                              ),
+                              tooltip: 'Eliminar de favoritos',
+                              onPressed: () async {
+                                final userId =
+                                    FirebaseAuth.instance.currentUser?.uid;
+                                if (userId != null) {
+                                  await _favoriteService.removeFavorite(
+                                    artistId: artist.id,
+                                    festivalId: festivalId,
+                                  );
+                                  await loadFavoritesGrouped();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '${artist.name} eliminado de favoritos',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                             onTap: () {
-                              // Aquí puedes navegar a detalles del artista o festival, si quieres
+                              // Navegar a detalles si quieres
                             },
+                          );
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: const Text('Eliminar todos'),
+                                      content: const Text(
+                                        '¿Seguro que quieres eliminar todos los favoritos de este festival?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, false),
+                                          child: const Text('Cancelar'),
+                                        ),
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, true),
+                                          child: const Text('Eliminar'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+
+                              if (confirm == true) {
+                                final userId =
+                                    FirebaseAuth.instance.currentUser?.uid;
+                                if (userId != null) {
+                                  await _favoriteService
+                                      .removeAllFavoritesForFestival(
+                                        userId,
+                                        festivalId,
+                                      );
+                                  await loadFavoritesGrouped();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Favoritos eliminados de $festivalName',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.delete),
+                            label: const Text('Eliminar todos'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.shade400,
+                            ),
                           ),
-                        )
-                        .toList(),
-              );
-            }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+        ),
       ),
     );
   }

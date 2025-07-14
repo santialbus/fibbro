@@ -187,4 +187,22 @@ class FavoriteService {
 
     return favSnapshot.docs.map((doc) => doc.data()).toList();
   }
+
+  Future<void> removeAllFavoritesForFestival(
+    String userId,
+    String festivalId,
+  ) async {
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('favorites')
+            .where('userId', isEqualTo: userId)
+            .where('festivalId', isEqualTo: festivalId)
+            .get();
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
 }

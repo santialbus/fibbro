@@ -83,13 +83,7 @@ class _HomePageState extends State<HomePage> {
           genres.any((g) => g.contains(query));
     }).toList();
   }
-
-  void _onGenreSelected(String genre) {
-    setState(() {
-      _searchQuery = genre;
-    });
-  }
-
+  
   Widget _buildFestivalCard(
     BuildContext context,
     DocumentSnapshot<Map<String, dynamic>> doc,
