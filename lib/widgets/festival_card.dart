@@ -14,6 +14,7 @@ class FestivalCard extends StatelessWidget {
   final bool hasMap;
   final bool isFollowing;
   final VoidCallback onToggleFollow;
+  final void Function(String genre)? onGenreTap;
 
   const FestivalCard({
     super.key,
@@ -30,6 +31,7 @@ class FestivalCard extends StatelessWidget {
     this.genres,
     required this.isFollowing,
     required this.onToggleFollow,
+    this.onGenreTap,
   });
 
   String get dateRange {
@@ -120,21 +122,11 @@ class FestivalCard extends StatelessWidget {
                   spacing: 6,
                   runSpacing: -4,
                   children: [
-                    // Mostrar hasta 3 géneros
                     ...genres!
                         .take(3)
                         .map(
                           (genre) => GestureDetector(
-                            onTap: () {
-                              // Aquí puedes activar el filtro por género
-                              debugPrint('Filtro por género: $genre');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Filtrando por: $genre'),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
+                            onTap: () => onGenreTap?.call(genre),
                             child: Chip(
                               label: Text(
                                 genre,

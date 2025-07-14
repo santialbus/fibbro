@@ -20,6 +20,8 @@ class _HomePageState extends State<HomePage> {
 
   final Map<String, bool> _followingStatus = {};
 
+  final TextEditingController _searchController = TextEditingController();
+
   bool _isSearching = false;
   String _searchQuery = '';
 
@@ -35,6 +37,12 @@ class _HomePageState extends State<HomePage> {
     Future.delayed(Duration.zero, () {
       NotificationHelper.checkNotificationStatus(context);
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadFollowStatusForFestival(String festivalId) async {
@@ -74,6 +82,12 @@ class _HomePageState extends State<HomePage> {
           country.contains(query) ||
           genres.any((g) => g.contains(query));
     }).toList();
+  }
+
+  void _onGenreSelected(String genre) {
+    setState(() {
+      _searchQuery = genre;
+    });
   }
 
   Widget _buildFestivalCard(
@@ -117,6 +131,13 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       },
+      onGenreTap: (genre) {
+        setState(() {
+          _isSearching = true;
+          _searchQuery = genre;
+          _searchController.text = genre;
+        });
+      },
     );
   }
 
@@ -127,6 +148,7 @@ class _HomePageState extends State<HomePage> {
         title:
             _isSearching
                 ? TextField(
+                  controller: _searchController,
                   autofocus: true,
                   decoration: const InputDecoration(
                     hintText: 'Buscar festivales...',
