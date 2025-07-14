@@ -55,9 +55,24 @@ class _HomePageState extends State<HomePage> {
   ) {
     if (_searchQuery.isEmpty) return docs;
 
+    final query = _searchQuery.toLowerCase();
+
     return docs.where((doc) {
-      final name = (doc.data()?['name'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery.toLowerCase());
+      final data = doc.data();
+      if (data == null) return false;
+
+      final name = (data['name'] ?? '').toString().toLowerCase();
+      final city = (data['ciudad'] ?? '').toString().toLowerCase();
+      final country = (data['pais'] ?? '').toString().toLowerCase();
+      final genres =
+          List<String>.from(
+            data['genres'] ?? [],
+          ).map((g) => g.toLowerCase()).toList();
+
+      return name.contains(query) ||
+          city.contains(query) ||
+          country.contains(query) ||
+          genres.any((g) => g.contains(query));
     }).toList();
   }
 
