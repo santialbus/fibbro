@@ -29,26 +29,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _markReadThenLoad() async {
-    await _notificationStorage.markAllAsRead();
+    // Aquí no borramos todo para que las notificaciones no desaparezcan solas
+    // Si quieres borrar todo al abrir, descomenta esta línea:
+    // await _notificationStorage.markAllAsRead();
+
     await _loadNotifications();
   }
 
   Future<void> _loadNotifications() async {
     setState(() => isLoading = true);
 
-    // 1. Cargar favoritos completos
     favoriteArtists = await _favoriteService.getFavoriteArtistsForUser(
       widget.userId,
     );
-
-    // 2. Obtener IDs con notificación no leída
     final unreadIds = await _notificationStorage.getUnreadIds();
-
-    // 3. Filtrar artistas no leídos (próximos)
     unreadArtists =
         favoriteArtists.where((a) => unreadIds.contains(a.id)).toList();
 
-    // 4. Calcular solapados entre artistas favoritos
     solapadosMap = artistasSolapados(favoriteArtists);
 
     setState(() {
@@ -94,35 +91,112 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return solapamientos;
   }
 
+  // Método para borrar una notificación individual
+  Future<void> _deleteNotification(String artistId) async {
+    await _notificationStorage.markAsRead(artistId);
+    await _loadNotifications();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Notificación eliminada')));
+  }
+
+  // Método para borrar todas las notificaciones
+  Future<void> _deleteAllNotifications() async {
+    await _notificationStorage.markAllAsRead();
+    await _loadNotifications();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Todas las notificaciones eliminadas')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Notificaciones')),
+        appBar: AppBar(
+          title: const Text('Notificaciones'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              onPressed: null, // Deshabilitado mientras carga
+            ),
+          ],
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notificaciones')),
+      appBar: AppBar(
+        title: const Text('Notificaciones'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            tooltip: 'Eliminar todas las notificaciones',
+            onPressed:
+                unreadArtists.isEmpty
+                    ? null
+                    : () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text('Confirmar'),
+                              content: const Text(
+                                '¿Quieres eliminar todas las notificaciones?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.of(context).pop(false),
+                                  child: const Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.of(context).pop(true),
+                                  child: const Text('Eliminar'),
+                                ),
+                              ],
+                            ),
+                      );
+                      if (confirm == true) {
+                        await _deleteAllNotifications();
+                      }
+                    },
+          ),
+        ],
+      ),
       body: ListView(
         children: [
           if (unreadArtists.isNotEmpty) ...[
             const ListTile(title: Text('Próximos artistas con notificaciones')),
             ...unreadArtists.map(
-              (artist) => ListTile(
-                leading: const Icon(
-                  Icons.notifications_active,
+              (artist) => Dismissible(
+                key: Key(artist.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   color: Colors.red,
+                  child: const Icon(Icons.delete, color: Colors.white),
                 ),
-                title: Text(artist.name),
-                subtitle: Text(
-                  'Empieza a las ${artist.time} en ${artist.stage}',
-                ),
-                trailing: Text(artist.date),
-                onTap: () {
-                  // Navegar a detalles o marcar individual como leído
+                onDismissed: (direction) {
+                  _deleteNotification(artist.id);
                 },
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.notifications_active,
+                    color: Colors.red,
+                  ),
+                  title: Text(artist.name),
+                  subtitle: Text(
+                    'Empieza a las ${artist.time} en ${artist.stage}',
+                  ),
+                  trailing: Text(artist.date),
+                  onTap: () {
+                    // Puedes navegar a detalles o marcar individual como leído aquí si quieres
+                  },
+                ),
               ),
             ),
             const Divider(),

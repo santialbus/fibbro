@@ -26,4 +26,13 @@ class NotificationStorageService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(_unreadKey)?.length ?? 0;
   }
+
+  Future<void> markAsRead(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getStringList(_unreadKey) ?? [];
+    if (current.contains(id)) {
+      current.remove(id);
+      await prefs.setStringList(_unreadKey, current);
+    }
+  }
 }

@@ -46,8 +46,7 @@ Future<void> requestExactAlarmPermission() async {
     if (!result.isGranted) {
       await openAppSettings();
     }
-  } else {
-  }
+  } else {}
 }
 
 class MyApp extends StatelessWidget {
@@ -58,7 +57,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FIB Horarios',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
+      theme: ThemeData(brightness: Brightness.light),
+      darkTheme: ThemeData(brightness: Brightness.dark),
+      themeMode: ThemeMode.system,
       routes: {
         '/notifications': (context) {
           final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
