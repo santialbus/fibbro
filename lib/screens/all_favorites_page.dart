@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:myapp/services/favorite_service.dart';
-
 import '../models/artist.dart';
 
 class AllFavoritesPage extends StatefulWidget {
@@ -17,13 +18,15 @@ class AllFavoritesPage extends StatefulWidget {
 class _AllFavoritesPageState extends State<AllFavoritesPage> {
   final FavoriteService _favoriteService = FavoriteService();
   bool isLoading = true;
-  Map<String, List<Artist>> favoritesByFestival = {}; // festivalId -> artistas
-  Map<String, String> festivalNames = {}; // Para mostrar nombre festival
+  Map<String, List<Artist>> favoritesByFestival = {};
+  Map<String, String> festivalNames = {};
 
   @override
   void initState() {
     super.initState();
-    loadFavoritesGrouped();
+    initializeDateFormatting('es_ES', null).then((_) {
+      loadFavoritesGrouped();
+    });
   }
 
   Future<void> loadFavoritesGrouped() async {
@@ -63,10 +66,8 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
 
       loadedFestivalNames[festivalId] = festDoc.data()?['name'] ?? 'Festival';
 
-      // Cargar artistas favoritos de este festival (usando tu lógica adaptada)
       List<Artist> artists;
       if (festivalId == FavoriteService.fibFestivalId) {
-        // Desde JSON local para FIB
         final jsonString = await rootBundle.loadString(
           'assets/docs/artists.json',
         );
@@ -74,7 +75,6 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
         final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
         artists = allArtists.where((a) => artistIds.contains(a.id)).toList();
       } else {
-        // Desde Firebase para otros festivales
         artists = [];
         const batchSize = 10;
         for (var i = 0; i < artistIds.length; i += batchSize) {
@@ -109,25 +109,30 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     });
   }
 
-  DateTime parseFestivalDateTime(String date, String time) {
-    // Ejemplo: date = '2025-07-15', time = '01:30'
-    final dateParts = date.split('-').map(int.parse).toList();
-    final timeParts = time.split(':').map(int.parse).toList();
+  // Ajuste del "día festivalero": de 16:00h a 06:00h del día siguiente
+  DateTime parseFestivalDateTime(String? date, String? time) {
+    final dateParts = date?.split('-').map(int.parse).toList();
+    final timeParts = time?.split(':').map(int.parse).toList();
 
-    final dateTime = DateTime(
-      dateParts[0],
+    final rawDateTime = DateTime(
+      dateParts![0],
       dateParts[1],
       dateParts[2],
-      timeParts[0],
+      timeParts![0],
       timeParts[1],
     );
 
-    // Si es antes de las 6:00, pertenece al "día anterior" desde las 17:00
-    if (dateTime.hour < 6) {
-      return dateTime.subtract(const Duration(days: 1));
+    if (rawDateTime.hour < 6 || rawDateTime.hour < 16) {
+      return rawDateTime.subtract(const Duration(days: 1));
     }
 
-    return dateTime;
+    return rawDateTime;
+  }
+
+  String formatFestivalDay(DateTime dateTime) {
+    final formatter = DateFormat.EEEE('es_ES');
+    final monthFormatter = DateFormat.MMMM('es_ES');
+    return '${formatter.format(dateTime).capitalize()} ${dateTime.day} ${monthFormatter.format(dateTime)}';
   }
 
   @override
@@ -158,6 +163,116 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                 final artists = entry.value;
                 final festivalName = festivalNames[festivalId] ?? 'Festival';
 
+                final Map<String, List<Artist>> artistsByDay = {};
+
+                for (final artist in artists) {
+                  final dayKey = artist.date!;
+                  artistsByDay.putIfAbsent(dayKey, () => []).add(artist);
+                }
+
+                final sortedDays =
+                    artistsByDay.keys.toList()..sort(
+                      (a, b) => DateTime.parse(a).compareTo(DateTime.parse(b)),
+                    );
+
+                final dayWidgets = <Widget>[];
+
+                for (final day in sortedDays) {
+                  final date = DateTime.parse(day);
+                  final artistsOfDay = artistsByDay[day]!;
+
+                  artistsOfDay.sort((a, b) {
+                    int parseTime(String time) {
+                      final parts = time.split(':');
+                      int hour = int.parse(parts[0]);
+                      int minute = int.parse(parts[1]);
+                      if (hour < 6) hour += 24;
+                      return hour * 60 + minute;
+                    }
+
+                    return parseTime(a.time!) - parseTime(b.time!);
+                  });
+
+                  dayWidgets.add(
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        top: 12,
+                        bottom: 4,
+                      ),
+                      child: Text(
+                        formatFestivalDay(date),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  );
+
+                  for (final artist in artistsOfDay) {
+                    dayWidgets.add(
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading:
+                            artist.imageUrl != null &&
+                                    artist.imageUrl!.isNotEmpty
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Image.network(
+                                    artist.imageUrl!,
+                                    width: 48,
+                                    height: 48,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                                : CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor: Colors.grey.shade300,
+                                  child: const Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        title: Text(
+                          artist.name,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          '${artist.stage} • ${artist.date} ${artist.time}',
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.favorite, color: Colors.red),
+                          tooltip: 'Eliminar de favoritos',
+                          onPressed: () async {
+                            final userId =
+                                FirebaseAuth.instance.currentUser?.uid;
+                            if (userId != null) {
+                              await _favoriteService.removeFavorite(
+                                artistId: artist.id,
+                                festivalId: festivalId,
+                              );
+                              await loadFavoritesGrouped();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${artist.name} eliminado de favoritos',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        onTap: () {},
+                      ),
+                    );
+                  }
+                }
+
                 return Card(
                   margin: const EdgeInsets.symmetric(
                     vertical: 8,
@@ -182,79 +297,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                       ),
                     ),
                     children: [
-                      ListView.separated(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: artists.length,
-                        separatorBuilder:
-                            (_, __) => const Divider(indent: 72, height: 1),
-                        itemBuilder: (context, index) {
-                          final artist = artists[index];
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                            leading:
-                                artist.imageUrl != null &&
-                                        artist.imageUrl!.isNotEmpty
-                                    ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(24),
-                                      child: Image.network(
-                                        artist.imageUrl!,
-                                        width: 48,
-                                        height: 48,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                    : CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: Colors.grey.shade300,
-                                      child: const Icon(
-                                        Icons.person,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            title: Text(
-                              artist.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '${artist.stage} • ${artist.date} ${artist.time}',
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.favorite,
-                                color: Colors.red,
-                              ),
-                              tooltip: 'Eliminar de favoritos',
-                              onPressed: () async {
-                                final userId =
-                                    FirebaseAuth.instance.currentUser?.uid;
-                                if (userId != null) {
-                                  await _favoriteService.removeFavorite(
-                                    artistId: artist.id,
-                                    festivalId: festivalId,
-                                  );
-                                  await loadFavoritesGrouped();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        '${artist.name} eliminado de favoritos',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                            onTap: () {
-                              // Navegar a detalles si quieres
-                            },
-                          );
-                        },
-                      ),
+                      ...dayWidgets,
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16.0,
@@ -325,4 +368,9 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
       ),
     );
   }
+}
+
+extension StringCasingExtension on String {
+  String capitalize() =>
+      isNotEmpty ? '${this[0].toUpperCase()}${substring(1)}' : '';
 }
