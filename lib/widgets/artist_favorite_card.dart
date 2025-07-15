@@ -36,13 +36,10 @@ class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
     int hour = int.parse(parts[0]);
     int minute = int.parse(parts[1]);
 
-    final startDateTime = DateTime(0, 1, 1, hour, minute);
-    final endDateTime = startDateTime.add(Duration(minutes: duration));
+    final start = DateTime(0, 1, 1, hour, minute);
+    final end = start.add(Duration(minutes: duration));
 
-    // Formatear a HH:mm, añadiendo cero si es necesario
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-
-    return '${twoDigits(endDateTime.hour)}:${twoDigits(endDateTime.minute)}';
+    return '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
   }
 
   void _toggleFavorite() {
@@ -54,34 +51,70 @@ class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
 
   @override
   Widget build(BuildContext context) {
+    final artist = widget.artist;
+    final endTime = getEndTime(artist.time, artist.duration);
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Text(widget.artist.name, style: const TextStyle(fontSize: 18)),
-        subtitle: Text(
-          '${widget.artist.time} -  ${getEndTime(widget.artist.time, widget.artist.duration)}\n'
-          '${widget.artist.stage}\n'
-          '${widget.artist.genre ?? "Género no disponible"}',
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
+        leading:
+            artist.imageUrl != null && artist.imageUrl!.isNotEmpty
+                ? ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.network(
+                    artist.imageUrl!,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                  ),
+                )
+                : CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.grey.shade300,
+                  child: const Icon(Icons.music_note, color: Colors.white),
+                ),
+        title: Text(
+          artist.name,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (artist.time != null) Text('${artist.time} - ${endTime ?? ""}'),
+            if (artist.stage != null && artist.stage!.isNotEmpty)
+              Text('Escenario: ${artist.stage!}'),
+            if (artist.genre != null)
+              Text(
+                artist.genre!,
+                style: const TextStyle(
+                  color: Colors.deepPurpleAccent,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: Icon(
-                isFavorite ? Icons.star : Icons.star_border,
-                color: isFavorite ? Colors.amber : null,
-              ),
-              onPressed: _toggleFavorite,
-            ),
             if (widget.showAlert && widget.overlappingArtists.isNotEmpty)
               Tooltip(
                 message:
                     'Solapa con: ${widget.overlappingArtists.map((a) => a.name).join(', ')}',
                 child: const Icon(Icons.error_outline, color: Colors.redAccent),
               ),
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                color: isFavorite ? Colors.amber[700] : Colors.grey,
+              ),
+              onPressed: _toggleFavorite,
+            ),
           ],
         ),
       ),

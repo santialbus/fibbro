@@ -129,6 +129,44 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     return rawDateTime;
   }
 
+  Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
+    Map<String, List<String>> solapamientos = {};
+
+    int tiempoEnMinutos(String time) {
+      final parts = time.split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1]);
+      if (hour < 6) hour += 24;
+      return hour * 60 + minute;
+    }
+
+    List<Map<String, dynamic>> rangos =
+        artistas.map((artist) {
+          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
+          int duracion = artist.duration ?? 0;
+          int fin = inicio + duracion;
+          return {'id': artist.id, 'inicio': inicio, 'fin': fin};
+        }).toList();
+
+    for (int i = 0; i < rangos.length; i++) {
+      for (int j = i + 1; j < rangos.length; j++) {
+        final a = rangos[i];
+        final b = rangos[j];
+
+        bool seSolapan = (a['inicio'] < b['fin']) && (b['inicio'] < a['fin']);
+
+        if (seSolapan) {
+          solapamientos.putIfAbsent(a['id'], () => []);
+          solapamientos.putIfAbsent(b['id'], () => []);
+          solapamientos[a['id']]!.add(b['id']);
+          solapamientos[b['id']]!.add(a['id']);
+        }
+      }
+    }
+
+    return solapamientos;
+  }
+
   String formatFestivalDay(DateTime dateTime) {
     final formatter = DateFormat.EEEE('es_ES');
     final monthFormatter = DateFormat.MMMM('es_ES');
@@ -166,7 +204,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                 final Map<String, List<Artist>> artistsByDay = {};
 
                 for (final artist in artists) {
-                  final dayKey = artist.date!;
+                  final dayKey = artist.date;
                   artistsByDay.putIfAbsent(dayKey, () => []).add(artist);
                 }
 
@@ -211,7 +249,18 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                     ),
                   );
 
+                  final solapadosMap = artistasSolapados(artistsOfDay);
+
                   for (final artist in artistsOfDay) {
+                    final overlappingIds = solapadosMap[artist.id] ?? [];
+                    final overlappingArtists =
+                        overlappingIds
+                            .map(
+                              (id) =>
+                                  artistsOfDay.firstWhere((a) => a.id == id),
+                            )
+                            .toList();
+
                     dayWidgets.add(
                       ListTile(
                         contentPadding: const EdgeInsets.symmetric(
@@ -245,28 +294,46 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                         subtitle: Text(
                           '${artist.stage} • ${artist.date} ${artist.time}',
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.favorite, color: Colors.red),
-                          tooltip: 'Eliminar de favoritos',
-                          onPressed: () async {
-                            final userId =
-                                FirebaseAuth.instance.currentUser?.uid;
-                            if (userId != null) {
-                              await _favoriteService.removeFavorite(
-                                artistId: artist.id,
-                                festivalId: festivalId,
-                              );
-                              await loadFavoritesGrouped();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${artist.name} eliminado de favoritos',
-                                  ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (overlappingArtists.isNotEmpty)
+                              Tooltip(
+                                message:
+                                    'Solapa con: ${overlappingArtists.map((a) => a.name).join(', ')}',
+                                child: const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.redAccent,
                                 ),
-                              );
-                            }
-                          },
+                              ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.favorite,
+                                color: Colors.red,
+                              ),
+                              tooltip: 'Eliminar de favoritos',
+                              onPressed: () async {
+                                final userId =
+                                    FirebaseAuth.instance.currentUser?.uid;
+                                if (userId != null) {
+                                  await _favoriteService.removeFavorite(
+                                    artistId: artist.id,
+                                    festivalId: festivalId,
+                                  );
+                                  await loadFavoritesGrouped();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '${artist.name} eliminado de favoritos',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
                         ),
+
                         onTap: () {},
                       ),
                     );
