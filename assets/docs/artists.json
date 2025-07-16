@@ -135,13 +135,22 @@
   "duration": 60
     },
     {
+      "id": "48bb9cc7-0c8e-4521-8b20-0a7a20c0fdb6",
+      "name": "Lobo miró",
+      "date": "2025-07-17",
+      "time": "21:00",
+      "genre": "Electro",
+      "stage": "South Beach", 
+  "duration": 60
+    },
+    {
       "id": "e5d52894-1cc3-4058-841f-2dd3c79fbd9d",
-      "name": "Camellos",
+      "name": "Melifluo",
       "date": "2025-07-17",
       "time": "02:50",
-      "genre": "Rock n roll",
+      "genre": "Indie",
       "stage": "Rising Stars", 
-  "duration": 55
+      "duration": 55
     },
     {
       "id": "fae12ec2-d185-4bce-925e-f2b7745a9ee7",
@@ -297,6 +306,15 @@
   "duration": 80
     },
     {
+      "id": "83c01e38-ea6e-442e-8e8b-00baf597b93f",
+      "name": "Ganges",
+      "date": "2025-07-18",
+      "time": "01:35",
+      "genre": "Indie",
+      "stage": "Repsol", 
+  "duration": 80
+    },
+    {
       "id": "30e263d5-ecdf-4e99-800c-1bc215846cc3",
       "name": "Elyella",
       "date": "2025-07-18",
@@ -381,10 +399,10 @@
       "id": "826c6e5f-d38c-4714-bb07-e88932db04cb",
       "name": "Mala Gestión",
       "date": "2025-07-18",
-      "time": null,
-      "genre": null,
-      "stage": null, 
-  "duration": null
+      "time": "00:35",
+      "genre": "Rock",
+      "stage": "Rising Stars", 
+  "duration": 60
     },
     {
       "id": "d4cf93b9-b991-4c89-98f7-f0f3f1521a44",
@@ -442,7 +460,7 @@
     },
     {
       "id": "d8b5de2f-4571-4ebf-95ce-c9dd7b3c2aa7",
-      "name": "Hunne",
+      "name": "Raxon",
       "date": "2025-07-18",
       "time": "21:00",
       "genre": "Electro",
@@ -534,9 +552,9 @@
       "id": "2bb21ad7-cf3b-43ec-a0f2-23d15d7b4cc5",
       "name": "Iván Ferreiro",
       "date": "2025-07-19",
-      "time": "21:00",
+      "time": "20:00",
       "genre": "Pop",
-      "stage": "Cutty Shark", 
+      "stage": "Heineken", 
   "duration": 75
     },
     {
@@ -579,6 +597,15 @@
       "id": "3f27fc96-d038-4bdb-a0d3-d85d44d1a83f",
       "name": "Karavana",
       "date": "2025-07-19",
+      "time": "21:00",
+      "genre": "Indie rock",
+      "stage": "Cutty Shark", 
+  "duration": 75
+    },
+    {
+      "id": "3f27fc96-d038-4bdb-a0d3-4987erwew7475",
+      "name": "Amatria",
+      "date": "2025-07-19",
       "time": "03:45",
       "genre": "Indie rock",
       "stage": "Cutty Shark", 
@@ -597,25 +624,34 @@
       "id": "4dcf8c33-9e52-4f2b-a60b-f789357e2f26",
       "name": "Hinds",
       "date": "2025-07-19",
-      "time": "00:30",
+      "time": "01:40",
       "genre": "Indie rock",
-      "stage": "Rising Stars", 
-  "duration": 70
+      "stage": "Repsol", 
+  "duration": 75
     },
     {
       "id": "6f04c28f-9291-4cfd-8320-8e0a46fc60c7",
       "name": "Ultraligera",
       "date": "2025-07-19",
-      "time": "19:00",
+      "time": "01:40",
       "genre": "Indie rock",
-      "stage": "Repsol", 
-  "duration": 60
+      "stage": "Cutty Shark", 
+  "duration": 75
     },
     {
       "id": "d83e38bb-7d0c-4456-9cc7-1c3b7297161a",
-      "name": "Jimena Amarillo",
+      "name": "Merino",
       "date": "2025-07-19",
-      "time": "21:00",
+      "time": "22:15",
+      "genre": "Pop",
+      "stage": "Rising Stars", 
+  "duration": 60
+    },
+    {
+      "id": "d83e38bb-7d0c-4456-9cc7-5754987932",
+      "name": "Victoria's",
+      "date": "2025-07-19",
+      "time": "00:30",
       "genre": "Pop",
       "stage": "Rising Stars", 
   "duration": 60
