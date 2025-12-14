@@ -14,3 +14,16 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+## Actualizaciones:
+
+Añadir a artista-festival 
+- dia real (para ordenar)
+- dia de festival
+
+Tipo de Usuario
+- superadmin
+- festival (admin)
+- usuario
+
