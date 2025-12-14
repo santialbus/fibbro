@@ -27,3 +27,6 @@ Tipo de Usuario
 - festival (admin)
 - usuario
 
+Profile para festival
+
+Mejorar notificaciones
