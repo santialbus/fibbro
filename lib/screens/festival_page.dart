@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_map_page.dart';
 import 'package:myapp/screens/state_page.dart';
 import 'package:myapp/widgets/draggable_favorite_button.dart';
-import 'package:myapp/screens/south_beach_page.dart';
-import 'package:myapp/screens/heineken_stage_page.dart';
-import 'package:myapp/screens/cutty_shark_page.dart';
-import 'package:myapp/screens/repsol_page.dart';
-import 'package:myapp/screens/rising_stars_page.dart';
 
 class FestivalPage extends StatefulWidget {
   final String festivalId;
@@ -31,8 +26,6 @@ class _FestivalPageState extends State<FestivalPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
-  bool get isFib => widget.festivalName.toLowerCase() == 'fib';
-
   @override
   void initState() {
     super.initState();
@@ -49,15 +42,6 @@ class _FestivalPageState extends State<FestivalPage>
   }
 
   List<Widget> _buildPages() {
-    if (isFib) {
-      return const [
-        HeinekenStagePage(),
-        RepsolPage(),
-        RisingStarsPage(),
-        CuttySharkPage(),
-        SouthBeachPage(),
-      ];
-    } else {
       return widget.stageNames.map((stage) {
         return StagePage(
           key: ValueKey(stage),
@@ -66,7 +50,6 @@ class _FestivalPageState extends State<FestivalPage>
           festivalId: widget.festivalId,
         );
       }).toList();
-    }
   }
 
   Future<bool> hasMapForFestival(String festivalId) async {
