@@ -17,7 +17,7 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLogin = true; // Controla si estamos en login o registro
   String? _errorMessage;
 
-  Future<void> _submit() async {
+  /*Future<void> _submit() async {
     setState(() => _errorMessage = null);
     try {
       if (_isLogin) {
@@ -32,6 +32,24 @@ class _AuthPageState extends State<AuthPage> {
         );
       }
       // Si todo va bien, navega a home o pantalla principal
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    }
+  }*/
+
+  Future<void> _submit() async {
+    setState(() => _errorMessage = null);
+
+    try {
+      // ⚠️ DEV MODE LOGIN – eliminar antes de producción
+      await _auth.signInWithEmailAndPassword(
+        email: 'damostwanted13@gmail.com',
+        password: 'unlimited23',
+      );
+
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       setState(() {

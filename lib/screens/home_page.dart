@@ -32,8 +32,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    // Chequeo de estado de notificaciones (Android 11+)
     Future.delayed(Duration.zero, () {
       NotificationHelper.checkNotificationStatus(context);
     });
@@ -54,7 +52,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _toggleFollow(String festivalId) async {
     await _followService.toggleFestivalFollow(festivalId);
-    // Recarga estado luego del toggle
     await _loadFollowStatusForFestival(festivalId);
   }
 
@@ -83,7 +80,7 @@ class _HomePageState extends State<HomePage> {
           genres.any((g) => g.contains(query));
     }).toList();
   }
-  
+
   Widget _buildFestivalCard(
     BuildContext context,
     DocumentSnapshot<Map<String, dynamic>> doc,
