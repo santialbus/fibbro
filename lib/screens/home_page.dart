@@ -69,8 +69,8 @@ class _HomePageState extends State<HomePage> {
       if (data == null) return false;
 
       final name = (data['name'] ?? '').toString().toLowerCase();
-      final city = (data['ciudad'] ?? '').toString().toLowerCase();
-      final country = (data['pais'] ?? '').toString().toLowerCase();
+      final city = (data['city'] ?? '').toString().toLowerCase();
+      final country = (data['country'] ?? '').toString().toLowerCase();
       final genres =
           List<String>.from(
             data['genres'] ?? [],
@@ -101,8 +101,8 @@ class _HomePageState extends State<HomePage> {
       name: (data['name'] ?? '').toString(),
       year: (data['year'] ?? '').toString(),
       dates: List<String>.from(data['date'] ?? []),
-      city: (data['ciudad'] ?? '').toString(),
-      country: (data['pais'] ?? '').toString(),
+      city: (data['city'] ?? '').toString(),
+      country: (data['country'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
       imageUrl: data['imageUrl'],
       followersCount: data['followersCount'],
@@ -118,8 +118,8 @@ class _HomePageState extends State<HomePage> {
                 (context) => FestivalPage(
                   festivalId: festivalId,
                   festivalName: (data['name'] ?? '').toString(),
-                  stageNames: List<String>.from(data['stages']),
-                  dates: List<String>.from(data['date']),
+                  stageNames: List<String>.from(data['stageNames']),
+                  dates: List<String>.from(data['dates']),
                 ),
           ),
         );
