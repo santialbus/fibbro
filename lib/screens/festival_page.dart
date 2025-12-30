@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/festival_map_page.dart';
 import 'package:myapp/screens/state_page.dart';
+import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/widgets/draggable_favorite_button.dart';
 
 class FestivalPage extends StatefulWidget {
@@ -42,6 +43,7 @@ class _FestivalPageState extends State<FestivalPage>
   }
 
   List<Widget> _buildPages() {
+    AppLogger.page('FestivalPage');
       return widget.stageNames.map((stage) {
         return StagePage(
           key: ValueKey(stage),

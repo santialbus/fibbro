@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/utils/app_logger.dart';
 import '../models/artist.dart';
 import '../services/favorite_service.dart';
 import '../services/notification_storage_service.dart';
@@ -25,6 +26,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('NotificationPage');
     _markReadThenLoad();
   }
 

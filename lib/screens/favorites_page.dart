@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
+import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
 
 import '../models/artist.dart';
@@ -46,6 +47,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('FavoritesPage');
     _festivalId = widget.festivalId;
     _userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     _dates = widget.dates;

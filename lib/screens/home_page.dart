@@ -4,6 +4,7 @@ import 'package:myapp/screens/festival_page.dart';
 import 'package:myapp/services/festival_follor_service.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
+import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/utils/notification_helper.dart';
 import 'package:myapp/widgets/festival_card.dart';
 
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('HomePage');
     Future.delayed(Duration.zero, () {
       NotificationHelper.checkNotificationStatus(context);
     });

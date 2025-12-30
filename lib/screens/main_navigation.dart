@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/all_favorites_page.dart';
 import 'package:myapp/screens/profile_page.dart';
+import 'package:myapp/utils/app_logger.dart';
 import 'home_page.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -27,6 +28,7 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('MainNavigationPage');
     _checkAndCreateUserProfile();
   }
 

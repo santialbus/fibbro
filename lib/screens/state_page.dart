@@ -4,6 +4,7 @@ import 'package:myapp/models/artist.dart';
 import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/artist_service.dart';
+import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/widgets/artist_card.dart';
 import 'package:myapp/widgets/stage_app_bar.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
@@ -36,6 +37,7 @@ class _StagePageState extends State<StagePage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('StatePage');
     _fetchArtists();
   }
 

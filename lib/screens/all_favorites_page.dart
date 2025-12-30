@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:myapp/services/favorite_service.dart';
+import 'package:myapp/utils/app_logger.dart';
 import '../models/artist.dart';
 
 class AllFavoritesPage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('AllFavoritesPage');
     initializeDateFormatting('es_ES', null).then((_) {
       loadFavoritesGrouped();
     });

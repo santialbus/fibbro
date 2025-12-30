@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myapp/utils/app_logger.dart';
 
 class FestivalMapPage extends StatefulWidget {
   final String festivalId;
@@ -18,6 +19,7 @@ class _FestivalMapPageState extends State<FestivalMapPage> {
   @override
   void initState() {
     super.initState();
+    AppLogger.page('FestivalMapPage');
     _loadMapUrl();
   }
 
