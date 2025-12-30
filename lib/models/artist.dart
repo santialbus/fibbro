@@ -1,55 +1,28 @@
 class Artist {
   final String id;
   final String name;
-  final String date;
-  final String? time;
-  final String? genre;
-  final String? stage;
-  final int? duration;
-  final String? imageUrl; // nuevo campo opcional para la imagen
+  final String? imageUrl;
+  final String genre;
 
-  Artist({
-    required this.id,
-    required this.name,
-    required this.date,
-    this.time,
-    this.genre,
-    this.stage,
-    this.duration,
-    this.imageUrl,
-  });
+  Artist({required this.id, required this.name, this.imageUrl, required this.genre});
 
-  factory Artist.fromJson(Map<String, dynamic> json) {
-    return Artist(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      date: json['date'] ?? '',
-      time: json['time'],
-      genre: json['genre'],
-      stage: json['stage'],
-      duration: json['duration'] as int?,
-      imageUrl: json['imageUrl'],
-    );
-  }
+  factory Artist.fromJson(Map<String, dynamic> json) => Artist(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    imageUrl: json['imageUrl'] as String?,
+    genre: json['genre'] as String,
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'date': date,
-      'time': time,
-      'genre': genre,
-      'stage': stage,
-      'duration': duration,
-      'imageUrl': imageUrl,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'imageUrl': imageUrl,
+    'genre': genre,
+  };
 
-  static List<Artist> listFromJson(List<dynamic> jsonList) {
-    return jsonList.map((json) => Artist.fromJson(json as Map<String, dynamic>)).toList();
-  }
+  static List<Artist> listFromJson(List<dynamic> list) =>
+      list.map((e) => Artist.fromJson(e)).toList();
 
-  static List<Map<String, dynamic>> listToJson(List<Artist> artists) {
-    return artists.map((artist) => artist.toJson()).toList();
-  }
+  static List<Map<String, dynamic>> listToJson(List<Artist> list) =>
+      list.map((e) => e.toJson()).toList();
 }
