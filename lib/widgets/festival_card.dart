@@ -61,6 +61,14 @@ class FestivalCard extends StatelessWidget {
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/images/default.png',
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                );
+                              },
                             )
                             : Image.asset(
                               'assets/images/default.png',

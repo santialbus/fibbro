@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/utils/app_logger.dart';
-import '../models/artist.dart';
 import '../services/favorite_service.dart';
 import '../services/notification_storage_service.dart';
 
@@ -18,8 +18,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   final NotificationStorageService _notificationStorage =
       NotificationStorageService();
 
-  List<Artist> favoriteArtists = [];
-  List<Artist> unreadArtists = [];
+  List<FestivalArtistDomain> favoriteArtists = [];
+  List<FestivalArtistDomain> unreadArtists = [];
   Map<String, List<String>> solapadosMap = {};
   bool isLoading = true;
 
@@ -55,7 +55,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
-  Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
+  Map<String, List<String>> artistasSolapados(List<FestivalArtistDomain> artistas) {
     Map<String, List<String>> solapamientos = {};
 
     int tiempoEnMinutos(String time) {
@@ -68,8 +68,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     List<Map<String, dynamic>> rangos =
         artistas.map((artist) {
-          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
-          int duracion = artist.duration ?? 0;
+          // ignore: unnecessary_null_comparison
+          int inicio = artist.startTime != null ? tiempoEnMinutos(artist.startTime) : 0;
+          int duracion = artist.duration;
           int fin = inicio + duracion;
           return {'id': artist.id, 'inicio': inicio, 'fin': fin};
         }).toList();
@@ -192,9 +193,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                   title: Text(artist.name),
                   subtitle: Text(
-                    'Empieza a las ${artist.time} en ${artist.stage}',
+                    'Empieza a las ${artist.startTime} en ${artist.stage}',
                   ),
-                  trailing: Text(artist.date),
+                  trailing: Text(artist.festivalDate),
                   onTap: () {
                     // Puedes navegar a detalles o marcar individual como leído aquí si quieres
                   },
@@ -228,9 +229,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           (a) => ListTile(
                             title: Text(a.name),
                             subtitle: Text(
-                              'Empieza a las ${a.time} en ${a.stage}',
+                              'Empieza a las ${a.startTime} en ${a.stage}',
                             ),
-                            trailing: Text(a.date),
+                            trailing: Text(a.festivalDate),
                           ),
                         )
                         .toList(),

@@ -4,6 +4,7 @@ class ArtistFestival {
   final String artistId;
   final String stage;
   final String festivalDay;
+  final String festivalDate;
   final String realDate;
   final int dayIndex;
   final int startMinutes;
@@ -18,6 +19,7 @@ class ArtistFestival {
     required this.artistId,
     required this.stage,
     required this.festivalDay,
+    required this.festivalDate,
     required this.realDate,
     required this.dayIndex,
     required this.startMinutes,
@@ -34,6 +36,7 @@ class ArtistFestival {
       artistId: json['artistId'] as String,
       stage: json['stage'] as String,
       festivalDay: json['festivalDay'] as String,
+      festivalDate: json['festivalDate'] as String,
       realDate: json['realDate'] as String,
       dayIndex: json['dayIndex'] as int,
       startMinutes: json['startMinutes'] as int,
@@ -51,6 +54,7 @@ class ArtistFestival {
       'artistId': artistId,
       'stage': stage,
       'festivalDay': festivalDay,
+      'festivalDate': festivalDate,
       'realDate': realDate,
       'dayIndex': dayIndex,
       'startMinutes': startMinutes,

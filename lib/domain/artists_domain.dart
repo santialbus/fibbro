@@ -1,9 +1,9 @@
 import 'package:myapp/models/artist.dart';
 import 'package:myapp/models/artist_festival.dart';
 
-class FestivalArtist {
+class FestivalArtistDomain {
   // Datos de Artist
-  final String id;           // id del artista
+  final String id; // id del artista
   final String name;
   final String genre;
   final String? imageUrl;
@@ -12,6 +12,7 @@ class FestivalArtist {
   final String festivalId;
   final String stage;
   final String festivalDay;
+  final String festivalDate;
   final String realDate;
   final int dayIndex;
   final int startMinutes;
@@ -20,7 +21,7 @@ class FestivalArtist {
   final int duration;
   final int order;
 
-  FestivalArtist({
+  FestivalArtistDomain({
     required this.id,
     required this.name,
     required this.genre,
@@ -28,6 +29,7 @@ class FestivalArtist {
     required this.festivalId,
     required this.stage,
     required this.festivalDay,
+    required this.festivalDate,
     required this.realDate,
     required this.dayIndex,
     required this.startMinutes,
@@ -37,8 +39,8 @@ class FestivalArtist {
     required this.order,
   });
 
-  factory FestivalArtist.from(Artist artist, ArtistFestival af) {
-    return FestivalArtist(
+  factory FestivalArtistDomain.from(Artist artist, ArtistFestival af) {
+    return FestivalArtistDomain(
       id: artist.id,
       name: artist.name,
       genre: artist.genre,
@@ -46,6 +48,7 @@ class FestivalArtist {
       festivalId: af.festivalId,
       stage: af.stage,
       festivalDay: af.festivalDay,
+      festivalDate: af.festivalDate,
       realDate: af.realDate,
       dayIndex: af.dayIndex,
       startMinutes: af.startMinutes,
@@ -55,4 +58,25 @@ class FestivalArtist {
       order: af.order,
     );
   }
+
+  factory FestivalArtistDomain.fromJson(Map<String, dynamic> json) {
+  return FestivalArtistDomain(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    genre: json['genre'] as String,
+    imageUrl: json['imageUrl'] as String?,
+    festivalId: json['festivalId'] as String,
+    stage: json['stage'] as String,
+    festivalDay: json['festivalDay'] as String,
+    festivalDate: json['festivalDate'] as String,
+    realDate: json['realDate'] as String,
+    dayIndex: json['dayIndex'] as int,
+    startMinutes: json['startMinutes'] as int,
+    endMinutes: json['endMinutes'] as int,
+    startTime: json['startTime'] as String,
+    duration: json['duration'] as int,
+    order: json['order'] as int,
+  );
+}
+
 }

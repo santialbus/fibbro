@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import '../models/artist.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
@@ -78,7 +78,7 @@ class NotificationService {
     );
   }
 
-  Future<bool> scheduleIfNotExists(Artist artist) async {
+  Future<bool> scheduleIfNotExists(FestivalArtistDomain artist) async {
     final prefs = await SharedPreferences.getInstance();
     final notifiedIds = prefs.getStringList('notified_artist_ids') ?? [];
 
@@ -89,7 +89,9 @@ class NotificationService {
     if (notifiedIds.contains(artist.id)) return false;
 
     final now = DateTime.now();
-    final artistDateTime = DateTime.parse('${artist.date} ${artist.time}');
+    final artistDateTime = DateTime.parse(
+      '${artist.festivalDate} ${artist.startTime}',
+    );
     final notificationTime = artistDateTime.subtract(
       const Duration(minutes: 10),
     );
@@ -103,7 +105,7 @@ class NotificationService {
       await _plugin.zonedSchedule(
         artist.id.hashCode,
         'Actúa pronto: ${artist.name}',
-        'Empieza a las ${artist.time} en el escenario ${artist.stage}',
+        'Empieza a las ${artist.startTime} en el escenario ${artist.stage}',
         tz.TZDateTime.from(notificationTime, tz.local),
         const NotificationDetails(
           android: AndroidNotificationDetails(

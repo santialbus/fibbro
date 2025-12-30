@@ -20,22 +20,25 @@ class _HomePageState extends State<HomePage> {
   final FestivalFollowService _followService = FestivalFollowService();
 
   final Map<String, bool> _followingStatus = {};
+  int _unreadCount = 0;
 
   final TextEditingController _searchController = TextEditingController();
-
   bool _isSearching = false;
   String _searchQuery = '';
-
-  Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
-    return _festivalService.getFestivalsStream();
-  }
 
   @override
   void initState() {
     super.initState();
     AppLogger.page('HomePage');
-    Future.delayed(Duration.zero, () {
+
+    Future.delayed(Duration.zero, () async {
+      // Notificaciones
       NotificationHelper.checkNotificationStatus(context);
+      _unreadCount = await NotificationStorageService().getUnreadCount();
+      setState(() {});
+
+      // Preload follow status en paralelo
+      await _preloadFollowStatus();
     });
   }
 
@@ -45,25 +48,45 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<void> _loadFollowStatusForFestival(String festivalId) async {
-    final isFollowing = await _followService.isFollowing(festivalId);
-    setState(() {
-      _followingStatus[festivalId] = isFollowing;
+  Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
+    return _festivalService.getFestivalsStream();
+  }
+
+  Future<void> _preloadFollowStatus() async {
+    final snapshot = await _festivalService.getFestivalsStream().first;
+
+    // Map paralelo para obtener todos los estados de follow al mismo tiempo
+    final futures = snapshot.docs.map((doc) async {
+      final festivalId = doc.id;
+      final isFollowing = await _followService.isFollowing(festivalId);
+      return MapEntry(festivalId, isFollowing);
     });
+
+    final entries = await Future.wait(futures);
+
+    if (mounted) {
+      setState(() {
+        _followingStatus.clear();
+        _followingStatus.addEntries(entries);
+      });
+    }
   }
 
   Future<void> _toggleFollow(String festivalId) async {
     await _followService.toggleFestivalFollow(festivalId);
-    await _loadFollowStatusForFestival(festivalId);
+    final isFollowing = await _followService.isFollowing(festivalId);
+    if (mounted) {
+      setState(() {
+        _followingStatus[festivalId] = isFollowing;
+      });
+    }
   }
 
   List<DocumentSnapshot<Map<String, dynamic>>> _filteredDocs(
-    List<DocumentSnapshot<Map<String, dynamic>>> docs,
-  ) {
+      List<DocumentSnapshot<Map<String, dynamic>>> docs) {
     if (_searchQuery.isEmpty) return docs;
 
     final query = _searchQuery.toLowerCase();
-
     return docs.where((doc) {
       final data = doc.data();
       if (data == null) return false;
@@ -72,9 +95,7 @@ class _HomePageState extends State<HomePage> {
       final city = (data['city'] ?? '').toString().toLowerCase();
       final country = (data['country'] ?? '').toString().toLowerCase();
       final genres =
-          List<String>.from(
-            data['genres'] ?? [],
-          ).map((g) => g.toLowerCase()).toList();
+          List<String>.from(data['genres'] ?? []).map((g) => g.toLowerCase());
 
       return name.contains(query) ||
           city.contains(query) ||
@@ -84,18 +105,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFestivalCard(
-    BuildContext context,
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
+      BuildContext context, DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     final festivalId = doc.id;
-
-    // Si no tenemos estado de seguimiento, lo cargamos
-    if (!_followingStatus.containsKey(festivalId)) {
-      _loadFollowStatusForFestival(festivalId);
-      // Mientras carga, asumimos false
-      _followingStatus[festivalId] = false;
-    }
 
     return FestivalCard(
       name: (data['name'] ?? '').toString(),
@@ -104,7 +116,9 @@ class _HomePageState extends State<HomePage> {
       city: (data['city'] ?? '').toString(),
       country: (data['country'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
-      imageUrl: data['imageUrl'],
+      imageUrl: data['imageUrl'] != null
+          ? data['imageUrl'].toString()
+          : null,
       followersCount: data['followersCount'],
       genres: List<String>.from(data['genres'] ?? []),
       hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty,
@@ -114,13 +128,12 @@ class _HomePageState extends State<HomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => FestivalPage(
-                  festivalId: festivalId,
-                  festivalName: (data['name'] ?? '').toString(),
-                  stageNames: List<String>.from(data['stageNames']),
-                  dates: List<String>.from(data['dates']),
-                ),
+            builder: (context) => FestivalPage(
+              festivalId: festivalId,
+              festivalName: (data['name'] ?? '').toString(),
+              stageNames: List<String>.from(data['stageNames'] ?? []),
+              dates: List<String>.from(data['dates'] ?? []),
+            ),
           ),
         );
       },
@@ -138,23 +151,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            _isSearching
-                ? TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar festivales...',
-                    border: InputBorder.none,
-                  ),
-                  style: const TextStyle(color: Colors.white),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                )
-                : const Text('onStagee'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar festivales...',
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(color: Colors.white),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              )
+            : const Text('onStagee'),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -165,51 +177,48 @@ class _HomePageState extends State<HomePage> {
               });
             },
           ),
-          FutureBuilder<int>(
-            future: NotificationStorageService().getUnreadCount(),
-            builder: (context, snapshot) {
-              final unreadCount = snapshot.data ?? 0;
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/notifications').then((
-                        _,
-                      ) async {
-                        await NotificationStorageService().markAllAsRead();
-                        setState(() {});
-                      });
-                    },
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 20,
-                          minHeight: 20,
-                        ),
-                        child: Text(
-                          unreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/notifications')
+                      .then((_) async {
+                    await NotificationStorageService().markAllAsRead();
+                    final newCount =
+                        await NotificationStorageService().getUnreadCount();
+                    setState(() {
+                      _unreadCount = newCount;
+                    });
+                  });
+                },
+              ),
+              if (_unreadCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                ],
-              );
-            },
+                    constraints: const BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: Text(
+                      _unreadCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -225,15 +234,14 @@ class _HomePageState extends State<HomePage> {
           }
 
           final docs = _filteredDocs(snapshot.data?.docs ?? []);
-
           if (docs.isEmpty) {
             return const Center(child: Text('No hay festivales disponibles.'));
           }
 
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder:
-                (context, index) => _buildFestivalCard(context, docs[index]),
+            itemBuilder: (context, index) =>
+                _buildFestivalCard(context, docs[index]),
           );
         },
       ),

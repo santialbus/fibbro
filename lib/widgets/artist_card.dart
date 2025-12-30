@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import '../models/artist.dart';
 
 class ArtistCard extends StatelessWidget {
-  final Artist artist;
+  final FestivalArtistDomain artist;
   final bool initiallyFavorite;
   final void Function(bool) onFavoriteChanged;
   final bool showAlert;
@@ -31,7 +32,7 @@ class ArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final endTime = getEndTime(artist.time, artist.duration);
+    final endTime = getEndTime(artist.startTime, artist.duration);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -62,19 +63,17 @@ class ArtistCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (artist.time != null)
-              Text('${artist.time}${endTime != null ? ' - $endTime' : ''}'),
-            if (artist.genre != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  artist.genre!,
-                  style: const TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: Colors.deepPurpleAccent,
-                  ),
+            Text('${artist.startTime}${endTime != null ? ' - $endTime' : ''}'),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                artist.genre,
+                style: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.deepPurpleAccent,
                 ),
               ),
+            ),
           ],
         ),
         trailing: Row(

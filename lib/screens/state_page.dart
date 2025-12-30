@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:myapp/models/artist.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/artist_service.dart';
@@ -29,7 +29,7 @@ class _StagePageState extends State<StagePage> {
   final FavoriteService _favoriteService = FavoriteService();
   final NotificationService _notificationService = NotificationService();
 
-  List<Artist> _artists = [];
+  List<FestivalArtistDomain> _artists = [];
   Set<String> _favoriteIds = {};
   bool _isLoading = true;
   int _currentDateIndex = 0;
@@ -49,14 +49,14 @@ class _StagePageState extends State<StagePage> {
 
     try {
       final currentDate = widget.dates[_currentDateIndex];
-      final artists = await ArtistService.getArtistsForStage(
+      final artists = await ArtistService.getArtistsForStageNew(
         festivalId: widget.festivalId,
         stage: widget.stageName,
-        rawDate: currentDate,
+        festivalDate: currentDate,
       );
 
       // Guardar en caché como JSON string
-      box.put(cacheKey, Artist.listToJson(artists));
+      //box.put(cacheKey, Artist.listToJson(artists));
 
       final favs = await _favoriteService.getFavoritesForFestival(
         widget.festivalId,
@@ -70,7 +70,8 @@ class _StagePageState extends State<StagePage> {
       });
     } catch (e) {
       // Intentar cargar desde cache si falla
-      final cachedData = box.get(cacheKey);
+      
+    /*final cachedData = box.get(cacheKey);
       if (cachedData != null) {
         setState(() {
           _artists = Artist.listFromJson(cachedData);
@@ -78,7 +79,7 @@ class _StagePageState extends State<StagePage> {
         });
       } else {
         setState(() => _isLoading = false);
-      }
+      }*/
     }
   }
 
@@ -87,7 +88,7 @@ class _StagePageState extends State<StagePage> {
     _fetchArtists();
   }
 
-  Future<void> _handleFavoriteChange(Artist artist, bool isNowFav) async {
+  Future<void> _handleFavoriteChange(FestivalArtistDomain artist, bool isNowFav) async {
     await _favoriteService.toggleFavorite(
       festivalId: widget.festivalId,
       artistId: artist.id,

@@ -1,14 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
 
-import '../models/artist.dart';
 import '../widgets/artist_favorite_card.dart';
 import '../services/favorite_service.dart';
 
@@ -32,7 +30,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   late final String _userId;
   late final List<String> _dates;
 
-  List<Artist> favoriteArtists = [];
+  List<FestivalArtistDomain> favoriteArtists = [];
   bool isLoading = true;
 
   final List<String> _availableDates = [
@@ -70,7 +68,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return dates.map(normalizeDate).toList();
   }
 
-  Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
+  Map<String, List<String>> artistasSolapados(
+    List<FestivalArtistDomain> artistas,
+  ) {
     Map<String, List<String>> solapamientos = {};
 
     int tiempoEnMinutos(String time) {
@@ -83,8 +83,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
     List<Map<String, dynamic>> rangos =
         artistas.map((artist) {
-          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
-          int duracion = artist.duration ?? 0;
+          int inicio =
+              // ignore: unnecessary_null_comparison
+              artist.startTime != null ? tiempoEnMinutos(artist.startTime) : 0;
+          int duracion = artist.duration;
           int fin = inicio + duracion;
           return {'id': artist.id, 'inicio': inicio, 'fin': fin};
         }).toList();
@@ -160,29 +162,25 @@ class _FavoritesPageState extends State<FavoritesPage> {
         festivalId: _festivalId,
       );
 
-      List<Artist> allArtists = [];
+      List<FestivalArtistDomain> allArtists = [];
 
-      if (isFib) {
-        final jsonString = await rootBundle.loadString(
-          'assets/docs/artists.json',
-        );
-        final jsonData = json.decode(jsonString);
-        allArtists = (jsonData as List).map((e) => Artist.fromJson(e)).toList();
-      } else {
-        final batchedIds = favoriteIds.take(10).toList();
+      final batchedIds = favoriteIds.take(10).toList();
 
-        final querySnapshot =
-            await FirebaseFirestore.instance
-                .collection('artists')
-                .where(FieldPath.documentId, whereIn: batchedIds)
-                .get();
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('artists')
+              .where(FieldPath.documentId, whereIn: batchedIds)
+              .get();
 
-        allArtists =
-            querySnapshot.docs
-                .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
-                .toList();
-
-      }
+      allArtists =
+          querySnapshot.docs
+              .map(
+                (doc) => FestivalArtistDomain.fromJson({
+                  ...doc.data(),
+                  'id': doc.id,
+                }),
+              )
+              .toList();
 
       final filtered =
           allArtists
@@ -190,7 +188,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               .toList();
 
       filtered.sort((a, b) {
-        final dateCompare = a.date.compareTo(b.date);
+        final dateCompare = a.festivalDate.compareTo(b.festivalDate);
         if (dateCompare != 0) return dateCompare;
 
         int parseTime(String? time) {
@@ -202,7 +200,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           return hour * 60 + minute;
         }
 
-        return parseTime(a.time) - parseTime(b.time);
+        return parseTime(a.startTime) - parseTime(b.startTime);
       });
 
       setState(() {
@@ -222,8 +220,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           if (wasScheduled) {
             await storageService.addUnread(artist.id);
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     } catch (e, st) {
       print('Error en loadFavorites: $e');
@@ -246,7 +243,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     final currentDate = getDates()[_currentDateIndex];
     final artistsOfDay =
-        favoriteArtists.where((a) => a.date == currentDate).toList();
+        favoriteArtists.where((a) => a.festivalDate == currentDate).toList();
     final solapadosMap = artistasSolapados(artistsOfDay);
 
     return Scaffold(

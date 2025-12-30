@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/artist.dart';
+import 'package:myapp/domain/artists_domain.dart';
 
 class ArtistFavoriteCard extends StatefulWidget {
-  final Artist artist;
+  final FestivalArtistDomain artist;
   final bool initiallyFavorite;
   final void Function(bool) onFavoriteChanged;
   final bool showAlert;
-  final List<Artist> overlappingArtists;
+  final List<FestivalArtistDomain> overlappingArtists;
 
   const ArtistFavoriteCard({
     super.key,
@@ -52,7 +52,7 @@ class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
   @override
   Widget build(BuildContext context) {
     final artist = widget.artist;
-    final endTime = getEndTime(artist.time, artist.duration);
+    final endTime = getEndTime(artist.startTime, artist.duration);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -86,17 +86,16 @@ class _ArtistFavoriteCardState extends State<ArtistFavoriteCard> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (artist.time != null) Text('${artist.time} - ${endTime ?? ""}'),
-            if (artist.stage != null && artist.stage!.isNotEmpty)
-              Text('Escenario: ${artist.stage!}'),
-            if (artist.genre != null)
-              Text(
-                artist.genre!,
-                style: const TextStyle(
-                  color: Colors.deepPurpleAccent,
-                  fontStyle: FontStyle.italic,
-                ),
+            Text('${artist.startTime} - ${endTime ?? ""}'),
+            if (artist.stage.isNotEmpty)
+              Text('Escenario: ${artist.stage}'),
+            Text(
+              artist.genre,
+              style: const TextStyle(
+                color: Colors.deepPurpleAccent,
+                fontStyle: FontStyle.italic,
               ),
+            ),
           ],
         ),
         trailing: Row(

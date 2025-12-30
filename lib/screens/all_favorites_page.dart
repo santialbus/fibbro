@@ -1,13 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/utils/app_logger.dart';
-import '../models/artist.dart';
 
 class AllFavoritesPage extends StatefulWidget {
   const AllFavoritesPage({super.key});
@@ -19,7 +17,7 @@ class AllFavoritesPage extends StatefulWidget {
 class _AllFavoritesPageState extends State<AllFavoritesPage> {
   final FavoriteService _favoriteService = FavoriteService();
   bool isLoading = true;
-  Map<String, List<Artist>> favoritesByFestival = {};
+  Map<String, List<FestivalArtistDomain>> favoritesByFestival = {};
   Map<String, String> festivalNames = {};
 
   @override
@@ -53,7 +51,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
       idsByFestival.putIfAbsent(festId, () => []).add(artistId);
     }
 
-    Map<String, List<Artist>> loadedFavorites = {};
+    Map<String, List<FestivalArtistDomain>> loadedFavorites = {};
     Map<String, String> loadedFestivalNames = {};
 
     for (final entry in idsByFestival.entries) {
@@ -68,37 +66,34 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
 
       loadedFestivalNames[festivalId] = festDoc.data()?['name'] ?? 'Festival';
 
-      List<Artist> artists;
-      if (festivalId == FavoriteService.fibFestivalId) {
-        final jsonString = await rootBundle.loadString(
-          'assets/docs/artists.json',
+      List<FestivalArtistDomain> artists;
+
+      artists = [];
+      const batchSize = 10;
+      for (var i = 0; i < artistIds.length; i += batchSize) {
+        final batchIds = artistIds.sublist(
+          i,
+          i + batchSize > artistIds.length ? artistIds.length : i + batchSize,
         );
-        final jsonData = json.decode(jsonString) as List;
-        final allArtists = jsonData.map((e) => Artist.fromJson(e)).toList();
-        artists = allArtists.where((a) => artistIds.contains(a.id)).toList();
-      } else {
-        artists = [];
-        const batchSize = 10;
-        for (var i = 0; i < artistIds.length; i += batchSize) {
-          final batchIds = artistIds.sublist(
-            i,
-            i + batchSize > artistIds.length ? artistIds.length : i + batchSize,
-          );
-          if (batchIds.isEmpty) continue;
+        if (batchIds.isEmpty) continue;
 
-          final artistsQuery =
-              await FirebaseFirestore.instance
-                  .collection('artists')
-                  .where('id_festival', isEqualTo: festivalId)
-                  .where(FieldPath.documentId, whereIn: batchIds)
-                  .get();
+        final artistsQuery =
+            await FirebaseFirestore.instance
+                .collection('artists')
+                .where('id_festival', isEqualTo: festivalId)
+                .where(FieldPath.documentId, whereIn: batchIds)
+                .get();
 
-          artists.addAll(
-            artistsQuery.docs
-                .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
-                .toList(),
-          );
-        }
+        artists.addAll(
+          artistsQuery.docs
+              .map(
+                (doc) => FestivalArtistDomain.fromJson({
+                  ...doc.data(),
+                  'id': doc.id,
+                }),
+              )
+              .toList(),
+        );
       }
 
       loadedFavorites[festivalId] = artists;
@@ -131,7 +126,9 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
     return rawDateTime;
   }
 
-  Map<String, List<String>> artistasSolapados(List<Artist> artistas) {
+  Map<String, List<String>> artistasSolapados(
+    List<FestivalArtistDomain> artistas,
+  ) {
     Map<String, List<String>> solapamientos = {};
 
     int tiempoEnMinutos(String time) {
@@ -144,8 +141,10 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
 
     List<Map<String, dynamic>> rangos =
         artistas.map((artist) {
-          int inicio = artist.time != null ? tiempoEnMinutos(artist.time!) : 0;
-          int duracion = artist.duration ?? 0;
+          int inicio =
+              // ignore: unnecessary_null_comparison
+              artist.startTime != null ? tiempoEnMinutos(artist.startTime) : 0;
+          int duracion = artist.duration;
           int fin = inicio + duracion;
           return {'id': artist.id, 'inicio': inicio, 'fin': fin};
         }).toList();
@@ -203,10 +202,10 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                 final artists = entry.value;
                 final festivalName = festivalNames[festivalId] ?? 'Festival';
 
-                final Map<String, List<Artist>> artistsByDay = {};
+                final Map<String, List<FestivalArtistDomain>> artistsByDay = {};
 
                 for (final artist in artists) {
-                  final dayKey = artist.date;
+                  final dayKey = artist.festivalDate;
                   artistsByDay.putIfAbsent(dayKey, () => []).add(artist);
                 }
 
@@ -230,7 +229,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                       return hour * 60 + minute;
                     }
 
-                    return parseTime(a.time!) - parseTime(b.time!);
+                    return parseTime(a.startTime) - parseTime(b.startTime);
                   });
 
                   dayWidgets.add(
@@ -294,7 +293,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
-                          '${artist.stage} • ${artist.date} ${artist.time}',
+                          '${artist.stage} • ${artist.festivalDate} ${artist.startTime}',
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,

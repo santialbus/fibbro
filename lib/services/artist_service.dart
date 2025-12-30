@@ -1,43 +1,59 @@
 // lib/services/artist_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/models/artist.dart';
-import 'package:myapp/utils/date_utils.dart';
+import 'package:myapp/models/artist_festival.dart';
 
 class ArtistService {
-  static Future<List<Artist>> getArtistsForStage({
+
+  static Future<List<FestivalArtistDomain>> getArtistsForStageNew({
     required String festivalId,
+    required String festivalDate,
     required String stage,
-    required String rawDate,
   }) async {
-    final date = DateUtilsHelper.normalizeDate(rawDate);
+    // 1️⃣ Query artist_festival
+    final afSnapshot =
+        await FirebaseFirestore.instance
+            .collection('artist_festival')
+            .where('festivalId', isEqualTo: festivalId)
+            .where('festivalDate', isEqualTo: festivalDate)
+            .where('stage', isEqualTo: stage)
+            .orderBy('order')
+            .get();
+    if (afSnapshot.docs.isEmpty) {
+      return [];
+    }
 
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('artists')
-        .where('id_festival', isEqualTo: festivalId.trim())
-        .where('stage', isEqualTo: stage)
-        .where('date', isEqualTo: date)
-        .get();
+    final artistFestivals =
+        afSnapshot.docs
+            .map(
+              (doc) => ArtistFestival.fromJson({...doc.data(), 'id': doc.id}),
+            )
+            .toList();
+    final artistIds = artistFestivals.map((af) => af.artistId).toSet().toList();
 
-    final artists = querySnapshot.docs
-        .map((doc) => Artist.fromJson({...doc.data(), 'id': doc.id}))
-        .toList();
+    if (artistIds.isEmpty) {
+      return [];
+    }
+    final artistsSnapshot =
+        await FirebaseFirestore.instance
+            .collection('artists')
+            .where(FieldPath.documentId, whereIn: artistIds)
+            .get();
+    final artistsById = {
+      for (final doc in artistsSnapshot.docs)
+        doc.id: Artist.fromJson({...doc.data(), 'id': doc.id}),
+    };
+    final result = <FestivalArtistDomain>[];
 
-    final withTime = artists.where((a) => a.time != null).toList();
-    final withoutTime = artists.where((a) => a.time == null).toList();
+    for (final af in artistFestivals) {
+      final artist = artistsById[af.artistId];
+      if (artist == null) continue;
 
-    withTime.sort((a, b) {
-      int parseTime(String time) {
-        final parts = time.split(':');
-        int hour = int.parse(parts[0]);
-        int minute = int.parse(parts[1]);
-        if (hour < 6) hour += 24;
-        return hour * 60 + minute;
-      }
+      result.add(FestivalArtistDomain.from(artist, af));
+    }
 
-      return parseTime(a.time!) - parseTime(b.time!);
-    });
-
-    return [...withTime, ...withoutTime];
+    return result;
   }
 }
