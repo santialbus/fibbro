@@ -14,46 +14,29 @@ class _AuthPageState extends State<AuthPage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool _isLogin = true; // Controla si estamos en login o registro
+  final bool _isLogin = true; // Controla si estamos en login o registro
   String? _errorMessage;
-
-  /*Future<void> _submit() async {
-    setState(() => _errorMessage = null);
-    try {
-      if (_isLogin) {
-        await _auth.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      } else {
-        await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      }
-      // Si todo va bien, navega a home o pantalla principal
-      Navigator.pushReplacementNamed(context, '/home');
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
-    }
-  }*/
 
   Future<void> _submit() async {
     setState(() => _errorMessage = null);
 
     try {
-      // ⚠️ DEV MODE LOGIN – eliminar antes de producción
-      await _auth.signInWithEmailAndPassword(
+      // ⚠️ MODO DEV – LOGIN CON USUARIO HARD-CODED
+      // Cambia email y password a tu usuario de prueba
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: 'damostwanted13@gmail.com',
         password: 'unlimited23',
       );
 
+      // Navegar a la pantalla principal
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error inesperado: $e';
       });
     }
   }
@@ -70,20 +53,23 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Email
+            // Email (solo visual)
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email (Modo DEV)'),
               keyboardType: TextInputType.emailAddress,
+              enabled: false,
             ),
 
             const SizedBox(height: 16),
 
-            // Password
+            // Password (solo visual)
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
+              decoration:
+                  const InputDecoration(labelText: 'Contraseña (Modo DEV)'),
               obscureText: true,
+              enabled: false,
             ),
 
             const SizedBox(height: 20),
@@ -100,23 +86,7 @@ class _AuthPageState extends State<AuthPage> {
 
             ElevatedButton(
               onPressed: _submit,
-              child: Text(_isLogin ? 'Iniciar sesión' : 'Registrarse'),
-            ),
-
-            const SizedBox(height: 12),
-
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isLogin = !_isLogin;
-                  _errorMessage = null;
-                });
-              },
-              child: Text(
-                _isLogin
-                    ? '¿No tienes cuenta? Regístrate'
-                    : '¿Ya tienes cuenta? Inicia sesión',
-              ),
+              child: const Text('Iniciar sesión (Modo DEV)'),
             ),
           ],
         ),
