@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/domain/artists_domain.dart';
+import 'package:myapp/services/artist_service.dart';
 import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/app_logger.dart';
@@ -162,25 +163,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
         festivalId: _festivalId,
       );
 
-      List<FestivalArtistDomain> allArtists = [];
-
-      final batchedIds = favoriteIds.take(10).toList();
-
-      final querySnapshot =
-          await FirebaseFirestore.instance
-              .collection('artists')
-              .where(FieldPath.documentId, whereIn: batchedIds)
-              .get();
-
-      allArtists =
-          querySnapshot.docs
-              .map(
-                (doc) => FestivalArtistDomain.fromJson({
-                  ...doc.data(),
-                  'id': doc.id,
-                }),
-              )
-              .toList();
+      final allArtists = await ArtistService.getArtistsByIds(
+        artistIds: favoriteIds,
+        festivalId: _festivalId,
+      );
 
       final filtered =
           allArtists
