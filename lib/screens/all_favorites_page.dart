@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:myapp/domain/artists_domain.dart';
+import 'package:myapp/services/artist_service.dart';
 import 'package:myapp/services/favorite_service.dart';
 import 'package:myapp/utils/app_logger.dart';
 
@@ -77,23 +78,12 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
         );
         if (batchIds.isEmpty) continue;
 
-        final artistsQuery =
-            await FirebaseFirestore.instance
-                .collection('artists')
-                .where('id_festival', isEqualTo: festivalId)
-                .where(FieldPath.documentId, whereIn: batchIds)
-                .get();
-
-        artists.addAll(
-          artistsQuery.docs
-              .map(
-                (doc) => FestivalArtistDomain.fromJson({
-                  ...doc.data(),
-                  'id': doc.id,
-                }),
-              )
-              .toList(),
+        final allArtists = await ArtistService.getArtistsByIds(
+          artistIds: batchIds,
+          festivalId: festivalId,
         );
+
+        artists.addAll(allArtists);
       }
 
       loadedFavorites[festivalId] = artists;

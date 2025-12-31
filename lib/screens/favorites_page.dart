@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/services/artist_service.dart';
 import 'package:myapp/services/notification_service.dart';
