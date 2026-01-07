@@ -6,6 +6,7 @@ import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/utils/artist_overlap_utils.dart';
+import 'package:myapp/utils/date_utils.dart';
 import 'package:myapp/widgets/snackbar_helper.dart';
 
 import '../widgets/artist_favorite_card.dart';
@@ -53,55 +54,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
     loadFavorites();
   }
 
-  // Normaliza la fecha a yyyy-MM-dd
-  String normalizeDate(String date) {
-    // Si formato dd/MM/yyyy o dd-MM-yyyy, lo invierte a yyyy-MM-dd
-    if (RegExp(r'^\d{2}[-/]\d{2}[-/]\d{4}$').hasMatch(date)) {
-      final parts = date.split(RegExp(r'[-/]'));
-      return '${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}';
-    }
-    // Reemplaza / por - si ya es yyyy/MM/dd o yyyy-MM-dd
-    return date.replaceAll('/', '-');
-  }
-
   List<String> getDates() {
     List<String> dates = isFib ? _availableDates : _dates;
-    return dates.map(normalizeDate).toList();
-  }
-
-  String formatFullDate(String rawDate) {
-    final isoDate = normalizeDate(rawDate);
-    final date = DateTime.parse(isoDate);
-
-    const days = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ];
-    const months = [
-      'enero',
-      'febrero',
-      'marzo',
-      'abril',
-      'mayo',
-      'junio',
-      'julio',
-      'agosto',
-      'septiembre',
-      'octubre',
-      'noviembre',
-      'diciembre',
-    ];
-
-    final dayName = days[date.weekday - 1];
-    final day = date.day;
-    final monthName = months[date.month - 1];
-
-    return '$dayName, $day de $monthName';
+    return dates.map(DateUtilsHelper.normalizeDateNew).toList();
   }
 
   Future<void> loadFavorites() async {
@@ -215,7 +170,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   : null,
                         ),
                         Text(
-                          formatFullDate(currentDate),
+                          DateUtilsHelper.formatFullDate(currentDate),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
