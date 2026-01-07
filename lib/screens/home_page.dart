@@ -116,9 +116,7 @@ class _HomePageState extends State<HomePage> {
       city: (data['city'] ?? '').toString(),
       country: (data['country'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
-      imageUrl: data['imageUrl'] != null
-          ? data['imageUrl'].toString()
-          : null,
+      imageUrl: data['imageUrl']?.toString(),
       followersCount: data['followersCount'],
       genres: List<String>.from(data['genres'] ?? []),
       hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty,
