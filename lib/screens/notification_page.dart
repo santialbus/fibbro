@@ -3,7 +3,6 @@ import 'package:myapp/domain/artists_domain.dart';
 import 'package:myapp/services/artist_service.dart';
 import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/utils/artist_overlap_utils.dart';
-import '../services/favorite_service.dart';
 import '../services/notification_storage_service.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -16,7 +15,6 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  final FavoriteService _favoriteService = FavoriteService();
   final NotificationStorageService _notificationStorage =
       NotificationStorageService();
 
