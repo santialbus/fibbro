@@ -57,7 +57,7 @@ class ArtistService {
     return result;
   }
 
-static Future<List<FestivalArtistDomain>> getArtistsByIds({
+static Future<List<FestivalArtistDomain>> getArtistsByIdsAndFestivalId({
   required List<String> artistIds,
   required String festivalId,
 }) async {
@@ -99,6 +99,47 @@ static Future<List<FestivalArtistDomain>> getArtistsByIds({
       .whereType<FestivalArtistDomain>()
       .toList();
 }
+
+static Future<List<FestivalArtistDomain>> getArtistsByIds({
+  required List<String> artistIds
+}) async {
+  if (artistIds.isEmpty) return [];
+
+  final ids = artistIds.take(10).toList();
+
+  final afSnapshot = await FirebaseFirestore.instance
+      .collection('artist_festival')
+      .where('artistId', whereIn: ids)
+      .get();
+
+  if (afSnapshot.docs.isEmpty) return [];
+
+  final artistFestivals = afSnapshot.docs
+      .map((doc) => ArtistFestival.fromJson({...doc.data(), 'id': doc.id}))
+      .toList();
+
+  // 2️⃣ artists
+  final artistsSnapshot = await FirebaseFirestore.instance
+      .collection('artists')
+      .where(FieldPath.documentId, whereIn: ids)
+      .get();
+
+  final artistsById = {
+    for (final doc in artistsSnapshot.docs)
+      doc.id: Artist.fromJson({...doc.data(), 'id': doc.id}),
+  };
+
+  // 3️⃣ merge → DOMAIN
+  return artistFestivals
+      .map((af) {
+        final artist = artistsById[af.artistId];
+        if (artist == null) return null;
+        return FestivalArtistDomain.from(artist, af);
+      })
+      .whereType<FestivalArtistDomain>()
+      .toList();
+}
+
 
   
 }

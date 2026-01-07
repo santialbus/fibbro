@@ -79,7 +79,7 @@ class _AllFavoritesPageState extends State<AllFavoritesPage> {
         );
         if (batchIds.isEmpty) continue;
 
-        final allArtists = await ArtistService.getArtistsByIds(
+        final allArtists = await ArtistService.getArtistsByIdsAndFestivalId(
           artistIds: batchIds,
           festivalId: festivalId,
         );

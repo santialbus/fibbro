@@ -76,7 +76,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         festivalId: _festivalId,
       );
 
-      final allArtists = await ArtistService.getArtistsByIds(
+      final allArtists = await ArtistService.getArtistsByIdsAndFestivalId(
         artistIds: favoriteIds,
         festivalId: _festivalId,
       );
