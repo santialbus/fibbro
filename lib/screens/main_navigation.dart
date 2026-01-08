@@ -97,6 +97,11 @@ class _MainNavigationState extends State<MainNavigation> {
               currentIndex: _currentIndex,
               isProfileIncomplete: _isProfileIncomplete,
               onTap: (index) => setState(() => _currentIndex = index),
+              onSearchChanged: (query) {
+                // Aquí mandas el query a tu lógica de filtrado del HomePage
+                // Puedes usar un callback o una variable de estado que pase al Home
+                print("Buscando: $query");
+              },
             ),
           ),
         ],
