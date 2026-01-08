@@ -8,6 +8,8 @@ import 'package:myapp/services/notification_storage_service.dart';
 import 'package:myapp/utils/app_logger.dart';
 import 'package:myapp/widgets/festival_card.dart';
 
+import '../utils/NotificationHelper.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -18,7 +20,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FestivalService _festivalService = FestivalService();
   final FestivalFollowService _followService = FestivalFollowService();
-  final _notificationPermissionService = NotificationPermissionService();
+  //final _notificationPermissionService = NotificationPermissionService();
 
   final Map<String, bool> _followingStatus = {};
   int _unreadCount = 0;
@@ -33,8 +35,8 @@ class _HomePageState extends State<HomePage> {
     AppLogger.page('HomePage');
 
     Future.delayed(Duration.zero, () async {
-      // ignore: use_build_context_synchronously
-      await _notificationPermissionService.requestIfNeeded(context);
+      NotificationHelper.checkNotificationStatus(context);
+      //await _notificationPermissionService.requestIfNeeded(context);
       _unreadCount = await NotificationStorageService().getUnreadCount();
       setState(() {});
 
