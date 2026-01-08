@@ -1,45 +1,74 @@
 import '../domain/artists_domain.dart';
 
 class ArtistOverlapUtils {
+
   static Map<String, List<String>> artistasSolapados(
-    List<FestivalArtistDomain> artistas,
-  ) {
-    Map<String, List<String>> solapamientos = {};
+      List<FestivalArtistDomain> artistas,
+      ) {
+    final ranges = artistas
+        .where((a) => a.startTime.isNotEmpty && a.duration > 0)
+        .map(_toRange)
+        .toList();
 
-    int tiempoEnMinutos(String time) {
-      final parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      if (hour < 6) hour += 24;
-      return hour * 60 + minute;
-    }
+    return _calculateOverlaps(ranges);
+  }
 
-    List<Map<String, dynamic>> rangos =
-        artistas.map((artist) {
-          int inicio =
-              // ignore: unnecessary_null_comparison
-              artist.startTime != null ? tiempoEnMinutos(artist.startTime) : 0;
-          int duracion = artist.duration;
-          int fin = inicio + duracion;
-          return {'id': artist.id, 'inicio': inicio, 'fin': fin};
-        }).toList();
+  static _ArtistTimeRange _toRange(FestivalArtistDomain artist) {
+    final start = _toMinutes(artist.startTime);
+    final end = start + artist.duration;
 
-    for (int i = 0; i < rangos.length; i++) {
-      for (int j = i + 1; j < rangos.length; j++) {
-        final a = rangos[i];
-        final b = rangos[j];
+    return _ArtistTimeRange(
+      artistId: artist.id,
+      start: start,
+      end: end,
+    );
+  }
 
-        bool seSolapan = (a['inicio'] < b['fin']) && (b['inicio'] < a['fin']);
+  static int _toMinutes(String time) {
+    final parts = time.split(':');
+    var hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
 
-        if (seSolapan) {
-          solapamientos.putIfAbsent(a['id'], () => []);
-          solapamientos.putIfAbsent(b['id'], () => []);
-          solapamientos[a['id']]!.add(b['id']);
-          solapamientos[b['id']]!.add(a['id']);
+    if (hour < 6) hour += 24;
+
+    return hour * 60 + minute;
+  }
+
+  static Map<String, List<String>> _calculateOverlaps(
+      List<_ArtistTimeRange> ranges,
+      ) {
+    final overlaps = <String, List<String>>{};
+
+    for (var i = 0; i < ranges.length; i++) {
+      for (var j = i + 1; j < ranges.length; j++) {
+        final a = ranges[i];
+        final b = ranges[j];
+
+        if (_overlaps(a, b)) {
+          overlaps.putIfAbsent(a.artistId, () => []).add(b.artistId);
+          overlaps.putIfAbsent(b.artistId, () => []).add(a.artistId);
         }
       }
     }
-
-    return solapamientos;
+    return overlaps;
   }
+
+  static bool _overlaps(
+      _ArtistTimeRange a,
+      _ArtistTimeRange b,
+      ) {
+    return a.start < b.end && b.start < a.end;
+  }
+}
+
+class _ArtistTimeRange {
+  final String artistId;
+  final int start;
+  final int end;
+
+  const _ArtistTimeRange({
+    required this.artistId,
+    required this.start,
+    required this.end,
+  });
 }

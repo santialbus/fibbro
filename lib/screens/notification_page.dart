@@ -177,35 +177,48 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (solapadosMap.isNotEmpty) ...[
             const ListTile(title: Text('Artistas con horarios solapados')),
             ...solapadosMap.entries.map((entry) {
-              final artist = favoriteArtists.firstWhere(
-                (a) => a.id == entry.key,
-              );
+              final artist = unreadArtists
+                  .where((a) => a.id == entry.key)
+                  .cast<FestivalArtistDomain?>()
+                  .firstOrNull;
+
               final overlappingArtists =
-                  entry.value
-                      .map(
-                        (id) => favoriteArtists.firstWhere((a) => a.id == id),
-                      )
-                      .toList();
+              entry.value
+                  .map(
+                    (id) =>
+                unreadArtists
+                    .where((a) => a.id == id)
+                    .cast<FestivalArtistDomain?>()
+                    .firstOrNull,
+              )
+                  .whereType<FestivalArtistDomain>()
+                  .toList();
+
+              if (artist == null || overlappingArtists.isEmpty) {
+                return const SizedBox.shrink();
+              }
 
               return ExpansionTile(
                 title: Text(
                   '${artist.name} y solapados (${overlappingArtists.length})',
                 ),
                 children:
-                    overlappingArtists
-                        .map(
-                          (a) => ListTile(
-                            title: Text(a.name),
-                            subtitle: Text(
-                              'Empieza a las ${a.startTime} en ${a.stage}',
-                            ),
-                            trailing: Text(a.festivalDate),
-                          ),
-                        )
-                        .toList(),
+                overlappingArtists
+                    .map(
+                      (a) => ListTile(
+                    title: Text(a.name),
+                    subtitle: Text(
+                      'Empieza a las ${a.startTime} en ${a.stage}',
+                    ),
+                    trailing: Text(a.festivalDate),
+                  ),
+                )
+                    .toList(),
               );
             }),
-          ] else
+          ]
+
+          else
             const ListTile(
               title: Text('No hay artistas con horarios solapados.'),
             ),
