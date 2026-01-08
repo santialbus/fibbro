@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/screens/all_favorites_page.dart';
 import 'package:myapp/screens/profile_page.dart';
 import 'package:myapp/utils/app_logger.dart';
+import '../widgets/liquid/liquid_bottom_nav_bar.dart';
 import 'home_page.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -72,6 +73,40 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent, // importante para que se vea el blur
+      body: Stack(
+        children: [
+          // Contenido de la página con gradiente
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueGrey.shade900, Colors.blueGrey.shade700],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: _screens[_currentIndex],
+          ),
+
+          // BottomNavBar flotante
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: LiquidBottomNavBar(
+              currentIndex: _currentIndex,
+              isProfileIncomplete: _isProfileIncomplete,
+              onTap: (index) => setState(() => _currentIndex = index),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /*@override
+  Widget build(BuildContext context) {
+    return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -116,5 +151,5 @@ class _MainNavigationState extends State<MainNavigation> {
         ],
       ),
     );
-  }
+  }*/
 }
