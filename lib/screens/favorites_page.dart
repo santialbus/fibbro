@@ -56,7 +56,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   List<String> getDates() {
     List<String> dates = isFib ? _availableDates : _dates;
-    return dates.map(DateUtilsHelper.normalizeDateNew).toList();
+    return dates.map(DateUtilsHelper.normalizeToIso).toList();
   }
 
   Future<void> loadFavorites() async {
