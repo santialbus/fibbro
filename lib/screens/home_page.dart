@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
     return FestivalCard(
       name: (data['name'] ?? '').toString(),
       year: (data['year'] ?? '').toString(),
-      dates: List<String>.from(data['date'] ?? []),
+      dates: List<String>.from(data['dates'] ?? []),
       city: (data['city'] ?? '').toString(),
       country: (data['country'] ?? '').toString(),
       stageNames: List<String>.from(data['stages'] ?? []),
