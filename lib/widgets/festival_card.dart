@@ -14,7 +14,6 @@ class FestivalCard extends StatelessWidget {
   final bool hasMap;
   final bool isFollowing;
   final VoidCallback onToggleFollow;
-  final void Function(String genre)? onGenreTap;
 
   const FestivalCard({
     super.key,
@@ -31,7 +30,6 @@ class FestivalCard extends StatelessWidget {
     this.genres,
     required this.isFollowing,
     required this.onToggleFollow,
-    this.onGenreTap,
   });
 
   String get dateRange {
@@ -54,28 +52,27 @@ class FestivalCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child:
-                        (imageUrl != null && imageUrl!.isNotEmpty)
-                            ? Image.network(
-                              imageUrl!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  'assets/images/default.png',
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                );
-                              },
-                            )
-                            : Image.asset(
-                              'assets/images/default.png',
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
+                    child: (imageUrl != null && imageUrl!.isNotEmpty)
+                        ? Image.network(
+                      imageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/images/default.png',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                        : Image.asset(
+                      'assets/images/default.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -119,8 +116,7 @@ class FestivalCard extends StatelessWidget {
                       color: isFollowing ? Colors.red : Colors.grey,
                     ),
                     onPressed: onToggleFollow,
-                    tooltip:
-                        isFollowing ? 'Dejar de seguir' : 'Seguir festival',
+                    tooltip: isFollowing ? 'Dejar de seguir' : 'Seguir festival',
                   ),
                 ],
               ),
@@ -130,36 +126,28 @@ class FestivalCard extends StatelessWidget {
                   spacing: 6,
                   runSpacing: -4,
                   children: [
-                    ...genres!
-                        .take(3)
-                        .map(
-                          (genre) => GestureDetector(
-                            onTap: () => onGenreTap?.call(genre),
-                            child: Chip(
-                              label: Text(
-                                genre,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              backgroundColor: Colors.purple.shade50,
-                            ),
+                    ...genres!.take(3).map(
+                          (genre) => Chip(
+                        label: Text(
+                          genre,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
                           ),
                         ),
+                        backgroundColor: Colors.purple.shade50,
+                      ),
+                    ),
                     if (genres!.length > 3)
-                      Tooltip(
-                        message: genres!.skip(3).join(', '),
-                        child: Chip(
-                          label: Text(
-                            '+${genres!.length - 3} más',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black,
-                            ),
+                      Chip(
+                        label: Text(
+                          '+${genres!.length - 3} más',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
                           ),
-                          backgroundColor: Colors.grey.shade300,
                         ),
+                        backgroundColor: Colors.grey.shade300,
                       ),
                   ],
                 ),

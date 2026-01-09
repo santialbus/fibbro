@@ -23,9 +23,6 @@ class _HomePageState extends State<HomePage> {
   final Map<String, bool> _followingStatus = {};
   int _unreadCount = 0;
 
-  // Solo filtro para que lo use el bottom nav
-  String _searchQuery = '';
-
   @override
   void initState() {
     super.initState();
@@ -38,11 +35,6 @@ class _HomePageState extends State<HomePage> {
 
       await _preloadFollowStatus();
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _festivalsStream() {
@@ -78,35 +70,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Método público para que lo llame el bottom nav
-  void filterFestivals(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
-  List<DocumentSnapshot<Map<String, dynamic>>> _filteredDocs(
-      List<DocumentSnapshot<Map<String, dynamic>>> docs) {
-    if (_searchQuery.isEmpty) return docs;
-
-    final query = _searchQuery.toLowerCase();
-    return docs.where((doc) {
-      final data = doc.data();
-      if (data == null) return false;
-
-      final name = (data['name'] ?? '').toString().toLowerCase();
-      final city = (data['city'] ?? '').toString().toLowerCase();
-      final country = (data['country'] ?? '').toString().toLowerCase();
-      final genres =
-      List<String>.from(data['genres'] ?? []).map((g) => g.toLowerCase());
-
-      return name.contains(query) ||
-          city.contains(query) ||
-          country.contains(query) ||
-          genres.any((g) => g.contains(query));
-    }).toList();
-  }
-
   Widget _buildFestivalCard(
       BuildContext context, DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
@@ -138,9 +101,7 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       },
-      onGenreTap: (genre) {
-        filterFestivals(genre); // filtro desde el bottom nav
-      },
+      // Se eliminó onGenreTap
     );
   }
 
@@ -206,7 +167,7 @@ class _HomePageState extends State<HomePage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final docs = _filteredDocs(snapshot.data?.docs ?? []);
+          final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
             return const Center(child: Text('No hay festivales disponibles.'));
           }
