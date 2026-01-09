@@ -23,8 +23,7 @@ class _HomePageState extends State<HomePage> {
   final Map<String, bool> _followingStatus = {};
   int _unreadCount = 0;
 
-  final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
+  // Solo filtro para que lo use el bottom nav
   String _searchQuery = '';
 
   @override
@@ -33,19 +32,16 @@ class _HomePageState extends State<HomePage> {
     AppLogger.page('HomePage');
 
     Future.delayed(Duration.zero, () async {
-      // ignore: use_build_context_synchronously
       await _notificationPermissionService.requestIfNeeded(context);
       _unreadCount = await NotificationStorageService().getUnreadCount();
       setState(() {});
 
-      // Preload follow status en paralelo
       await _preloadFollowStatus();
     });
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -56,7 +52,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> _preloadFollowStatus() async {
     final snapshot = await _festivalService.getFestivalsStream().first;
 
-    // Map paralelo para obtener todos los estados de follow al mismo tiempo
     final futures = snapshot.docs.map((doc) async {
       final festivalId = doc.id;
       final isFollowing = await _followService.isFollowing(festivalId);
@@ -83,6 +78,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Método público para que lo llame el bottom nav
+  void filterFestivals(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   List<DocumentSnapshot<Map<String, dynamic>>> _filteredDocs(
       List<DocumentSnapshot<Map<String, dynamic>>> docs) {
     if (_searchQuery.isEmpty) return docs;
@@ -96,7 +98,7 @@ class _HomePageState extends State<HomePage> {
       final city = (data['city'] ?? '').toString().toLowerCase();
       final country = (data['country'] ?? '').toString().toLowerCase();
       final genres =
-          List<String>.from(data['genres'] ?? []).map((g) => g.toLowerCase());
+      List<String>.from(data['genres'] ?? []).map((g) => g.toLowerCase());
 
       return name.contains(query) ||
           city.contains(query) ||
@@ -137,11 +139,7 @@ class _HomePageState extends State<HomePage> {
         );
       },
       onGenreTap: (genre) {
-        setState(() {
-          _isSearching = true;
-          _searchQuery = genre;
-          _searchController.text = genre;
-        });
+        filterFestivals(genre); // filtro desde el bottom nav
       },
     );
   }
@@ -150,32 +148,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar festivales...',
-                  border: InputBorder.none,
-                ),
-                style: const TextStyle(color: Colors.white),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              )
-            : const Text('onStagee'),
+        title: const Text('onStagee'),
         actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                _searchQuery = '';
-              });
-            },
-          ),
           Stack(
             children: [
               IconButton(
@@ -185,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                       .then((_) async {
                     await NotificationStorageService().markAllAsRead();
                     final newCount =
-                        await NotificationStorageService().getUnreadCount();
+                    await NotificationStorageService().getUnreadCount();
                     setState(() {
                       _unreadCount = newCount;
                     });
