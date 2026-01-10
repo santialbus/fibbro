@@ -7,6 +7,7 @@ class LiquidBottomNavBar extends StatefulWidget {
   final Function(int) onTap;
   final bool isProfileIncomplete;
   final Function(String) onSearchChanged;
+  final String searchText;
 
   const LiquidBottomNavBar({
     Key? key,
@@ -14,6 +15,7 @@ class LiquidBottomNavBar extends StatefulWidget {
     required this.onTap,
     this.isProfileIncomplete = false,
     required this.onSearchChanged,
+    this.searchText = '',
   }) : super(key: key);
 
   @override
@@ -24,6 +26,21 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
   bool _isSearching = false;
   int? _pressingIndex;
   final TextEditingController _controller = TextEditingController();
+
+  @override
+  void didUpdateWidget(covariant LiquidBottomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Si el texto que viene de fuera cambia (ej: clic en card de género)
+    if (widget.searchText != oldWidget.searchText) {
+      _controller.text = widget.searchText;
+
+      // Si el texto no está vacío, nos aseguramos de que la barra se abra visualmente
+      if (widget.searchText.isNotEmpty && !_isSearching) {
+        setState(() => _isSearching = true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

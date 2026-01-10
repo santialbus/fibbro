@@ -1,3 +1,4 @@
+// lib/screens/search_page.dart
 import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:myapp/widgets/festival_card.dart';
 import '../domain/genre_domain.dart';
 
 class SearchPage extends StatefulWidget {
-  final String searchQuery; // Este viene de lo que escribes en la barra
+  final String searchQuery;
   final Function(String) onGenreSelected;
 
   const SearchPage({
@@ -20,13 +21,16 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  // Variable interna para manejar el género clickeado localmente
   String? _localGenreQuery;
 
   @override
   void didUpdateWidget(covariant SearchPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Si el usuario empieza a escribir en la barra, limpiamos el filtro de género local
+    // Si el texto de la barra superior se borra, volvemos a mostrar los géneros
+    if (widget.searchQuery.isEmpty && oldWidget.searchQuery.isNotEmpty) {
+      _localGenreQuery = null;
+    }
+    // Si el usuario escribe algo nuevo en la barra, priorizamos eso sobre el género seleccionado
     if (widget.searchQuery != oldWidget.searchQuery && widget.searchQuery.isNotEmpty) {
       _localGenreQuery = null;
     }
@@ -34,14 +38,35 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    // La búsqueda efectiva es: o lo que escribes, o el género que tocaste
     final effectiveQuery = (_localGenreQuery ?? widget.searchQuery).trim();
-
-    dev.log('🔍 SearchPage: Renderizando con query efectiva = "$effectiveQuery"');
+    final bool isViewingResults = effectiveQuery.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: effectiveQuery.isEmpty
+      // Solo mostramos el AppBar si hay algo buscado (estilo Apple Music)
+      appBar: isViewingResults
+          ? AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        centerTitle: false, // Alineado a la izquierda como en tu captura
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          onPressed: () {
+            setState(() => _localGenreQuery = null);
+            widget.onGenreSelected(''); // Limpiamos la búsqueda global
+          },
+        ),
+        title: Text(
+          effectiveQuery,
+          style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold
+          ),
+        ),
+      )
+          : null,
+      body: !isViewingResults
           ? _buildGenreGrid()
           : _buildSearchResults(effectiveQuery),
     );
@@ -56,9 +81,7 @@ class _SearchPageState extends State<SearchPage> {
             padding: EdgeInsets.fromLTRB(20, 80, 20, 20),
             child: Text(
               "Explorar todo",
-              style: TextStyle(
-                color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1),
             ),
           ),
         ),
@@ -76,11 +99,8 @@ class _SearchPageState extends State<SearchPage> {
                 final genre = festivalGenres[index];
                 return GestureDetector(
                   onTap: () {
-                    dev.log('🖱️ Click en género: ${genre.title}');
-                    setState(() {
-                      _localGenreQuery = genre.title; // CAMBIO INTERNO: Ahora la página sabe qué buscar
-                    });
-                    widget.onGenreSelected(genre.title); // Avisamos fuera por si el Navbar necesita actualizarse
+                    setState(() => _localGenreQuery = genre.title);
+                    widget.onGenreSelected(genre.title); // Sincroniza con el Nav Bar
                   },
                   child: Container(
                     clipBehavior: Clip.antiAlias,
@@ -106,9 +126,7 @@ class _SearchPageState extends State<SearchPage> {
                             alignment: Alignment.bottomLeft,
                             child: Text(
                               genre.title,
-                              style: const TextStyle(
-                                color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -144,26 +162,17 @@ class _SearchPageState extends State<SearchPage> {
           final List<dynamic> genresList = data['genres'] ?? [];
           final genres = genresList.map((g) => g.toString().toLowerCase()).toList();
 
-          return name.contains(lowerQuery) ||
-              city.contains(lowerQuery) ||
-              genres.any((g) => g.contains(lowerQuery));
+          return name.contains(lowerQuery) || city.contains(lowerQuery) || genres.any((g) => g.contains(lowerQuery));
         }).toList() ?? [];
 
         if (docs.isEmpty) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("No hay resultados para '$activeQuery'", style: const TextStyle(color: Colors.white)),
-              TextButton(
-                onPressed: () => setState(() => _localGenreQuery = null),
-                child: const Text("Volver a géneros", style: TextStyle(color: Colors.blue)),
-              )
-            ],
+          return Center(
+            child: Text("No hay resultados para '$activeQuery'", style: const TextStyle(color: Colors.grey)),
           );
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(top: 80, bottom: 120),
+          padding: const EdgeInsets.only(top: 20, bottom: 120),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data();

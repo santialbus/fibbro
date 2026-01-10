@@ -20,23 +20,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   bool _isProfileIncomplete = false;
-  String _searchQuery = ""; // Añade esto arriba
-
-  late final List<Widget> _screens = [
-    const HomePage(),
-    const AllFavoritesPage(),
-    const ProfilePage(),
-    SearchPage(
-      searchQuery: _searchQuery,
-      onGenreSelected: (genre) {
-        setState(() {
-          _searchQuery = genre;
-          // Si tu LiquidBottomNavBar tiene un controlador interno,
-          // deberías actualizarlo aquí también
-        });
-      },
-    ),
-  ];
+  String _searchQuery = "";
 
   @override
   void initState() {
@@ -45,13 +29,24 @@ class _MainNavigationState extends State<MainNavigation> {
     _checkAndCreateUserProfile();
   }
 
-  void _onTabTapped(int index) async {
-    // Si estamos en la pestaña de perfil
-    setState(() => _currentIndex = index);
-
-    // Solo si es la pestaña perfil, recarga el estado del perfil incompleto
-    if (index == 2) {
-      await _checkAndCreateUserProfile();
+  // Helper para obtener la pantalla actual y pasarle las funciones necesarias
+  Widget _getCurrentScreen() {
+    switch (_currentIndex) {
+      case 0: return const HomePage();
+      case 1: return const AllFavoritesPage();
+      case 2: return const ProfilePage();
+      case 3:
+        return SearchPage(
+          searchQuery: _searchQuery,
+          onGenreSelected: (genre) {
+            setState(() {
+              _searchQuery = genre;
+              // Al seleccionar un género, nos aseguramos de estar en la pestaña de búsqueda
+              _currentIndex = 3;
+            });
+          },
+        );
+      default: return const HomePage();
     }
   }
 
@@ -73,8 +68,8 @@ class _MainNavigationState extends State<MainNavigation> {
       final data = doc.data();
       final isIncomplete =
           data == null ||
-          (data['firstName']?.toString().isEmpty ?? true) ||
-          (data['lastName']?.toString().isEmpty ?? true);
+              (data['firstName']?.toString().isEmpty ?? true) ||
+              (data['lastName']?.toString().isEmpty ?? true);
 
       setState(() {
         _isProfileIncomplete = isIncomplete;
@@ -88,6 +83,7 @@ class _MainNavigationState extends State<MainNavigation> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
+          // Fondo con degradado
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -96,24 +92,33 @@ class _MainNavigationState extends State<MainNavigation> {
                 end: Alignment.bottomRight,
               ),
             ),
-            // Usamos la lista local 'screens'
-            child: _screens[_currentIndex],
+            // Renderizado de la pantalla actual
+            child: _getCurrentScreen(),
           ),
 
-          // BottomNavBar flotante (SIEMPRE visible porque está en el Stack)
+          // BottomNavBar flotante
           Positioned(
-            left: 12,
-            right: 12,
-            bottom: 12,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: LiquidBottomNavBar(
               currentIndex: _currentIndex,
+              searchText: _searchQuery, // Pasamos el texto para sincronizar el TextField
               isProfileIncomplete: _isProfileIncomplete,
-              onTap: (index) => setState(() => _currentIndex = index),
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                  // Si cambiamos a una pestaña que no sea búsqueda, limpiamos el query (opcional)
+                  if (index != 3) {
+                    _searchQuery = "";
+                  }
+                });
+              },
               onSearchChanged: (query) {
                 setState(() {
                   _searchQuery = query;
-                  // Si el usuario empieza a escribir, lo llevamos a la pestaña de búsqueda
-                  if (query.isNotEmpty) {
+                  // Si el usuario escribe, saltamos automáticamente a la SearchPage
+                  if (query.isNotEmpty && _currentIndex != 3) {
                     _currentIndex = 3;
                   }
                 });
@@ -124,53 +129,4 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
     );
   }
-
-  /*@override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favoritos',
-          ),
-          BottomNavigationBarItem(
-            icon: Stack(
-              children: [
-                const Icon(Icons.person),
-                if (_isProfileIncomplete)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Text(
-                        '!',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            label: _isProfileIncomplete ? 'Perfil (!)' : 'Perfil',
-          ),
-        ],
-      ),
-    );
-  }*/
 }
