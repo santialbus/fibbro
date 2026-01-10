@@ -211,18 +211,13 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
       child: IconButton(
         icon: const Icon(Icons.search_rounded, color: Colors.white, size: 28),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SearchPage(
-                searchQuery: "", // Inicialmente vacío
-                onGenreSelected: (genre) {
-                  print("Seleccionado: $genre");
-                  // Aquí manejas la lógica cuando toquen un género
-                },
-              ),
-            ),
-          );
+          // 1. Activamos el modo visual de búsqueda (el campo de texto)
+          setState(() => _isSearching = true);
+
+          // 2. IMPORTANTE: Avisamos al MainNavigation para que cambie a la pestaña 2 (SearchPage)
+          // Asumiendo que en tu MainNavigation la lista es: [Home, Favoritos, Search, Perfil]
+          // Si Search es la tercera posición, el índice es 2.
+          widget.onTap(3);
         },
       ),
     );
