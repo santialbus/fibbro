@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../screens/search_page.dart';
+
 class LiquidBottomNavBar extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -231,7 +233,20 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
     return Center(
       child: IconButton(
         icon: const Icon(Icons.search_rounded, color: Colors.white, size: 28),
-        onPressed: () => setState(() => _isSearching = true),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchPage(
+                searchQuery: "", // Inicialmente vacío
+                onGenreSelected: (genre) {
+                  print("Seleccionado: $genre");
+                  // Aquí manejas la lógica cuando toquen un género
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

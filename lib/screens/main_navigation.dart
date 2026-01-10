@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/all_favorites_page.dart';
 import 'package:myapp/screens/profile_page.dart';
+import 'package:myapp/screens/search_page.dart';
 import 'package:myapp/utils/app_logger.dart';
 import '../widgets/liquid/liquid_bottom_nav_bar.dart';
 import 'home_page.dart';
@@ -19,11 +20,22 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   bool _isProfileIncomplete = false;
+  String _searchQuery = ""; // Añade esto arriba
 
-  final List<Widget> _screens = [
+  late final List<Widget> _screens = [
     const HomePage(),
     const AllFavoritesPage(),
     const ProfilePage(),
+    SearchPage(
+      searchQuery: _searchQuery,
+      onGenreSelected: (genre) {
+        setState(() {
+          _searchQuery = genre;
+          // Si tu LiquidBottomNavBar tiene un controlador interno,
+          // deberías actualizarlo aquí también
+        });
+      },
+    ),
   ];
 
   @override
@@ -73,10 +85,9 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // importante para que se vea el blur
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Contenido de la página con gradiente
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -85,10 +96,11 @@ class _MainNavigationState extends State<MainNavigation> {
                 end: Alignment.bottomRight,
               ),
             ),
+            // Usamos la lista local 'screens'
             child: _screens[_currentIndex],
           ),
 
-          // BottomNavBar flotante
+          // BottomNavBar flotante (SIEMPRE visible porque está en el Stack)
           Positioned(
             left: 12,
             right: 12,
@@ -98,9 +110,13 @@ class _MainNavigationState extends State<MainNavigation> {
               isProfileIncomplete: _isProfileIncomplete,
               onTap: (index) => setState(() => _currentIndex = index),
               onSearchChanged: (query) {
-                // Aquí mandas el query a tu lógica de filtrado del HomePage
-                // Puedes usar un callback o una variable de estado que pase al Home
-                print("Buscando: $query");
+                setState(() {
+                  _searchQuery = query;
+                  // Si el usuario empieza a escribir, lo llevamos a la pestaña de búsqueda
+                  if (query.isNotEmpty) {
+                    _currentIndex = 3;
+                  }
+                });
               },
             ),
           ),
