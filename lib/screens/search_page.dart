@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/widgets/festival_card.dart';
 import '../domain/genre_domain.dart';
+import 'festival_page.dart';
 
 class SearchPage extends StatefulWidget {
   final String searchQuery;
@@ -176,6 +177,9 @@ class _SearchPageState extends State<SearchPage> {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data();
+            // Extraemos el ID del documento por si lo necesitas en la siguiente página
+            final festivalId = docs[index].id;
+
             return FestivalCard(
               name: data['name'] ?? '',
               year: data['year'] ?? '',
@@ -188,8 +192,23 @@ class _SearchPageState extends State<SearchPage> {
               genres: List<String>.from(data['genres'] ?? []),
               hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty,
               isFollowing: false,
-              onToggleFollow: () {},
-              onTap: () {},
+              onToggleFollow: () {
+                // Aquí podrías implementar la lógica rápida de seguimiento
+              },
+              onTap: () {
+                // NAVEGACIÓN: Te manda a la página del festival
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FestivalPage(
+                      festivalId: festivalId,
+                      festivalName: (data['name'] ?? '').toString(),
+                      stageNames: List<String>.from(data['stageNames'] ?? []),
+                      dates: List<String>.from(data['dates'] ?? []),
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
