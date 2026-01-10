@@ -36,7 +36,7 @@ class SearchPage extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 80, 20, 20),
             child: Text(
-              "Explorar todo",
+              "Buscar",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 32,
@@ -57,7 +57,7 @@ class SearchPage extends StatelessWidget {
             ),
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                final genre = appleGenres[index];
+                final genre = festivalGenres[index];
                 return GestureDetector(
                   onTap: () => onGenreSelected(genre.title),
                   child: Container(
@@ -109,7 +109,7 @@ class SearchPage extends StatelessWidget {
                   ),
                 );
               },
-              childCount: appleGenres.length,
+              childCount: festivalGenres.length,
             ),
           ),
         ),
