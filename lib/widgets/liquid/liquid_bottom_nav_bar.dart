@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-
 import '../../screens/search_page.dart';
 
 class LiquidBottomNavBar extends StatefulWidget {
@@ -30,10 +29,13 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // 40 de margen (20 izquierda + 20 derecha)
         double totalWidth = constraints.maxWidth - 40;
-        bool isProfile = widget.currentIndex == 2; // Lógica para Perfil
 
-        // Mantenemos tus alturas originales que se veían bien
+        // Definimos el ancho de la pieza de búsqueda para poder restarlo con precisión
+        const double searchIconWidth = 72.0;
+        const double spacing = 12.0;
+
         double normalHeight = 72.0;
         double searchHeight = 60.0;
         double currentHeight = _isSearching ? searchHeight : normalHeight;
@@ -52,7 +54,9 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeOutBack,
-                  width: isProfile ? totalWidth : (_isSearching ? 60.0 : totalWidth - 72 - 12),
+                  // Si estamos buscando, se encoge a un círculo (60).
+                  // Si NO estamos buscando, ocupa el ancho total MENOS el espacio del buscador.
+                  width: _isSearching ? 60.0 : (totalWidth - searchIconWidth - spacing),
                   height: _isSearching ? 60.0 : 72.0,
                   decoration: _glassDecoration(),
                   child: ClipRRect(
@@ -67,9 +71,9 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
                                 ? _buildHomeSmall()
                                 : Row(
                               key: const ValueKey("full_nav"),
-                              mainAxisAlignment: isProfile ? MainAxisAlignment.spaceEvenly : MainAxisAlignment.spaceAround,
+                              // Cambiado a spaceEvenly para evitar que los iconos se peguen a los bordes
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                // USAMOS EXPANDED PARA QUE NO HAYA OVERFLOW HORIZONTAL
                                 _buildTabItem(Icons.home_rounded, "Inicio", 0),
                                 _buildTabItem(Icons.favorite_rounded, "Favoritos", 1),
                                 _buildTabItem(Icons.person_rounded, "Perfil", 2),
@@ -82,31 +86,26 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
                   ),
                 ),
 
-                // Espaciador que desaparece si estás en Perfil o Buscando
+                const SizedBox(width: spacing),
+
+                // 2. PIEZA DERECHA (BUSCADOR) - SIEMPRE RENDERIZADA
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
-                  width: (isProfile || _isSearching) ? 0 : 12,
-                ),
-                if (_isSearching) const SizedBox(width: 12),
-
-                // 2. PIEZA DERECHA (BUSCADOR) - Se oculta en Perfil
-                if (!isProfile)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOutCubic,
-                    width: _isSearching ? totalWidth - 60 - 12 : 72,
-                    height: currentHeight,
-                    decoration: _glassDecoration(),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(36),
-                      child: Stack(
-                        children: [
-                          _glassEffect(),
-                          _isSearching ? _buildSearchInput() : _buildSearchIcon(),
-                        ],
-                      ),
+                  curve: Curves.easeInOutCubic,
+                  // Si buscamos, se expande. Si no, se queda en 72.
+                  width: _isSearching ? (totalWidth - 60.0 - spacing) : searchIconWidth,
+                  height: currentHeight,
+                  decoration: _glassDecoration(),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(36),
+                    child: Stack(
+                      children: [
+                        _glassEffect(),
+                        _isSearching ? _buildSearchInput() : _buildSearchIcon(),
+                      ],
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -115,7 +114,8 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
     );
   }
 
-  // --- ITEM NAVEGACIÓN CON BURBUJA (ZOOM AL TOCAR) ---
+  // --- MÉTODOS DE APOYO (Mantienen tu lógica de diseño) ---
+
   Widget _buildTabItem(IconData icon, String label, int index) {
     bool isSelected = widget.currentIndex == index;
     bool isPressing = _pressingIndex == index;
@@ -132,45 +132,28 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
         behavior: HitTestBehavior.opaque,
         child: Stack(
           alignment: Alignment.center,
-          clipBehavior: Clip.none, // IMPORTANTE: Permite que la burbuja sobresalga de la barra
+          clipBehavior: Clip.none,
           children: [
-            // LA BURBUJA (EL EFECTO LUPA)
             AnimatedScale(
-              // Si presionas, crece un 35% para crear ese efecto de "lupa"
               scale: isPressing ? 1.35 : (isSelected ? 1.0 : 0.0),
               duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutBack, // Efecto rebote de Apple
+              curve: Curves.easeOutBack,
               child: Container(
-                width: 75, // Más ancha que el área normal para que se note la burbuja
+                width: 75,
                 height: 55,
                 decoration: BoxDecoration(
-                  // Brillo intenso en presión
                   color: Colors.white.withOpacity(isPressing ? 0.25 : 0.15),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    if (isPressing)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      )
-                  ],
                 ),
               ),
             ),
-
-            // EL CONTENIDO (Icono y Texto)
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedScale(
-                  scale: isPressing ? 1.2 : 1.0,
-                  duration: const Duration(milliseconds: 150),
-                  child: Icon(
-                    icon,
-                    color: (isSelected || isPressing) ? Colors.white : Colors.white.withOpacity(0.5),
-                    size: 26,
-                  ),
+                Icon(
+                  icon,
+                  color: (isSelected || isPressing) ? Colors.white : Colors.white.withOpacity(0.5),
+                  size: 26,
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -178,7 +161,6 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
                   style: TextStyle(
                     color: (isSelected || isPressing) ? Colors.white : Colors.white.withOpacity(0.5),
                     fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ],
@@ -189,11 +171,10 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
     );
   }
 
-  // --- BUSCADOR RESTAURADO (VALORES DE image_849ae3.png) ---
   Widget _buildSearchInput() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 60, // Altura exacta del modo búsqueda
+      height: 60,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -203,19 +184,15 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
             child: TextField(
               controller: _controller,
               autofocus: true,
-              textAlignVertical: TextAlignVertical.center,
-              style: const TextStyle(color: Colors.white, fontSize: 16, decoration: TextDecoration.none),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: const InputDecoration(
                 hintText: "Search festivals...",
                 hintStyle: TextStyle(color: Colors.white54),
                 border: InputBorder.none,
-                isCollapsed: true,
-                contentPadding: EdgeInsets.only(top: 2),
               ),
               onChanged: widget.onSearchChanged,
             ),
           ),
-          const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
               setState(() => _isSearching = false);
@@ -263,7 +240,6 @@ class _LiquidBottomNavBarState extends State<LiquidBottomNavBar> {
     );
   }
 
-  // --- DECORACIÓN GLASS ---
   BoxDecoration _glassDecoration() => BoxDecoration(
     borderRadius: BorderRadius.circular(36),
     boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10))],
