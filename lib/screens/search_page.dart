@@ -1,13 +1,12 @@
-// lib/screens/search_page.dart
+import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/festival_service.dart';
 import 'package:myapp/widgets/festival_card.dart';
-
 import '../domain/genre_domain.dart';
 
-class SearchPage extends StatelessWidget {
-  final String searchQuery;
+class SearchPage extends StatefulWidget {
+  final String searchQuery; // Este viene de lo que escribes en la barra
   final Function(String) onGenreSelected;
 
   const SearchPage({
@@ -17,14 +16,34 @@ class SearchPage extends StatelessWidget {
   });
 
   @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  // Variable interna para manejar el género clickeado localmente
+  String? _localGenreQuery;
+
+  @override
+  void didUpdateWidget(covariant SearchPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Si el usuario empieza a escribir en la barra, limpiamos el filtro de género local
+    if (widget.searchQuery != oldWidget.searchQuery && widget.searchQuery.isNotEmpty) {
+      _localGenreQuery = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // La búsqueda efectiva es: o lo que escribes, o el género que tocaste
+    final effectiveQuery = (_localGenreQuery ?? widget.searchQuery).trim();
+
+    dev.log('🔍 SearchPage: Renderizando con query efectiva = "$effectiveQuery"');
+
     return Scaffold(
       backgroundColor: Colors.black,
-      // Usamos un Stack por si quieres poner la barra de búsqueda
-      // flotando encima de los resultados más adelante
-      body: searchQuery.isEmpty
+      body: effectiveQuery.isEmpty
           ? _buildGenreGrid()
-          : _buildSearchResults(),
+          : _buildSearchResults(effectiveQuery),
     );
   }
 
@@ -36,12 +55,9 @@ class SearchPage extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 80, 20, 20),
             child: Text(
-              "Buscar",
+              "Explorar todo",
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -1,
+                color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1,
               ),
             ),
           ),
@@ -53,36 +69,37 @@ class SearchPage extends StatelessWidget {
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.6, // Proporción similar a la captura
+              childAspectRatio: 1.6,
             ),
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
                 final genre = festivalGenres[index];
                 return GestureDetector(
-                  onTap: () => onGenreSelected(genre.title),
+                  onTap: () {
+                    dev.log('🖱️ Click en género: ${genre.title}');
+                    setState(() {
+                      _localGenreQuery = genre.title; // CAMBIO INTERNO: Ahora la página sabe qué buscar
+                    });
+                    widget.onGenreSelected(genre.title); // Avisamos fuera por si el Navbar necesita actualizarse
+                  },
                   child: Container(
-                    clipBehavior: Clip.antiAlias, // Importante para redondear la imagen
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
                       color: genre.color,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Stack(
                       children: [
-                        // --- LA IMAGEN CON EFECTO ---
                         Positioned.fill(
                           child: ShaderMask(
-                            // Esto ayuda a que el color se mezcle aún mejor
-                            shaderCallback: (rect) {
-                              return LinearGradient(
-                                colors: [genre.color.withOpacity(0.3), genre.color],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ).createShader(rect);
-                            },
+                            shaderCallback: (rect) => LinearGradient(
+                              colors: [genre.color.withOpacity(0.3), genre.color],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ).createShader(rect),
                             blendMode: BlendMode.dstIn,
                           ),
                         ),
-                        // --- EL TEXTO ---
                         Padding(
                           padding: const EdgeInsets.all(12),
                           child: Align(
@@ -90,16 +107,7 @@ class SearchPage extends StatelessWidget {
                             child: Text(
                               genre.title,
                               style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 4,
-                                    color: Colors.black26,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
+                                color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -113,33 +121,49 @@ class SearchPage extends StatelessWidget {
             ),
           ),
         ),
-        // Espaciado final para que la barra de búsqueda no tape el contenido
         const SliverToBoxAdapter(child: SizedBox(height: 150)),
       ],
     );
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(String activeQuery) {
     final FestivalService festivalService = FestivalService();
+    final lowerQuery = activeQuery.toLowerCase();
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: festivalService.getFestivalsStream(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Colors.white));
+        }
 
-        final query = searchQuery.toLowerCase();
-        final docs = snapshot.data!.docs.where((doc) {
+        final docs = snapshot.data?.docs.where((doc) {
           final data = doc.data();
           final name = (data['name'] ?? '').toString().toLowerCase();
-          final genres = List<String>.from(data['genres'] ?? []).map((g) => g.toLowerCase());
-          return name.contains(query) || genres.any((g) => g.contains(query));
-        }).toList();
+          final city = (data['city'] ?? '').toString().toLowerCase();
+          final List<dynamic> genresList = data['genres'] ?? [];
+          final genres = genresList.map((g) => g.toString().toLowerCase()).toList();
+
+          return name.contains(lowerQuery) ||
+              city.contains(lowerQuery) ||
+              genres.any((g) => g.contains(lowerQuery));
+        }).toList() ?? [];
 
         if (docs.isEmpty) {
-          return const Center(child: Text("No se encontraron festivales", style: TextStyle(color: Colors.white)));
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("No hay resultados para '$activeQuery'", style: const TextStyle(color: Colors.white)),
+              TextButton(
+                onPressed: () => setState(() => _localGenreQuery = null),
+                child: const Text("Volver a géneros", style: TextStyle(color: Colors.blue)),
+              )
+            ],
+          );
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(top: 100, bottom: 120),
+          padding: const EdgeInsets.only(top: 80, bottom: 120),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data();
@@ -150,7 +174,7 @@ class SearchPage extends StatelessWidget {
               city: data['city'] ?? '',
               country: data['country'] ?? '',
               stageNames: List<String>.from(data['stages'] ?? []),
-              imageUrl: data['imageUrl'] ?? '',
+              imageUrl: data['imageUrl'],
               followersCount: data['followersCount'] ?? 0,
               genres: List<String>.from(data['genres'] ?? []),
               hasMap: (data['mapUrl'] ?? '').toString().isNotEmpty,

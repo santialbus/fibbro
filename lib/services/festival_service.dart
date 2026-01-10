@@ -7,5 +7,10 @@ class FestivalService {
     return _firestore.collection('festivales').snapshots();
   }
 
-  // Si más adelante quieres agregar funciones como obtener por id, filtrar, etc., aquí se ponen.
+  Stream<QuerySnapshot<Map<String, dynamic>>> getFestivalsByGenre(String genre) {
+    return _firestore
+        .collection('festivales')
+        .where('genres', arrayContains: genre)
+        .snapshots();
+  }
 }
