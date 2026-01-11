@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../screens/search_page.dart';
 
 class LiquidBottomNavBar extends StatefulWidget {
   final int currentIndex;
@@ -10,13 +9,13 @@ class LiquidBottomNavBar extends StatefulWidget {
   final String searchText;
 
   const LiquidBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
     this.isProfileIncomplete = false,
     required this.onSearchChanged,
     this.searchText = '',
-  }) : super(key: key);
+  });
 
   @override
   State<LiquidBottomNavBar> createState() => _LiquidBottomNavBarState();

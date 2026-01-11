@@ -1,5 +1,4 @@
 // lib/screens/search_page.dart
-import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/services/festival_service.dart';
@@ -215,4 +214,6 @@ class _SearchPageState extends State<SearchPage> {
       },
     );
   }
+
+
 }
